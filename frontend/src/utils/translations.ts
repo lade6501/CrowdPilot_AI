@@ -52,10 +52,10 @@ export const translations = {
     inspector_clear: "Clear Inspector Selection",
     
     
-    rec_title: "AI Command Recommendations",
+    rec_title: "AI Orchestrator",
     rec_safety: "Safety Index",
     rec_efficiency: "Efficiency Score",
-    rec_run_analysis: "Run AI Analysis",
+    rec_run_analysis: "Consult AI Orchestrator",
     rec_no_active: "No Recommendations Active",
     rec_no_active_desc: "Background periodic analysis is suspended to conserve API limits. Click the button below to manually invoke the AI Orchestrator.",
     rec_trigger: "Trigger AI Orchestrator",
@@ -72,7 +72,7 @@ export const translations = {
     rec_stabilized: "Current congestion reduced by 21%.",
     
     
-    feed_title: "AI Mission Feed",
+    feed_title: "Mission Feed",
     feed_no_items: "No mission items active",
     feed_obs: "Observation",
     feed_reason: "Reasoning",
@@ -81,7 +81,7 @@ export const translations = {
     feed_monitoring: "Monitoring",
     
     
-    tactical_modules: "Tactical Action Modules",
+    tactical_modules: "Decision Studio",
     scenario_title: "AI Scenario Simulator",
     scenario_desc: "Test hypothetical crowd scenarios to calculate redistribution patterns and safety actions.",
     scenario_run: "Run",
@@ -129,6 +129,10 @@ export const translations = {
     directions_status: "Directions API Status",
     directions_delay: "Delay",
     directions_suggestion: "AI Suggestion",
+    status_banner_title: "Current Operational Status",
+    status_banner_normal: "AI is monitoring 42 live telemetry streams. No immediate intervention required.",
+    status_banner_active: "ATTENTION REQUIRED",
+    status_banner_investigating: "CrowdFlow AI is investigating",
   },
   es: {
     
@@ -181,10 +185,10 @@ export const translations = {
     inspector_clear: "Limpiar Selección del Inspector",
     
     
-    rec_title: "Recomendaciones de Comando de IA",
+    rec_title: "Orquestador de IA",
     rec_safety: "Índice de Seguridad",
     rec_efficiency: "Puntuación de Eficiencia",
-    rec_run_analysis: "Ejecutar Análisis",
+    rec_run_analysis: "Consultar Orquestador de IA",
     rec_no_active: "No hay Recomendaciones Activas",
     rec_no_active_desc: "El análisis periódico de fondo está suspendido para conservar los límites de la API. Haga clic en el botón de abajo para invocar manualmente al Orquestador.",
     rec_trigger: "Activar Orquestador de IA",
@@ -201,7 +205,7 @@ export const translations = {
     rec_stabilized: "Congestión actual reducida en un 21%.",
     
     
-    feed_title: "Feed de Misión de IA",
+    feed_title: "Feed de Misión",
     feed_no_items: "No hay elementos de misión activos",
     feed_obs: "Observación",
     feed_reason: "Razonamiento",
@@ -210,7 +214,7 @@ export const translations = {
     feed_monitoring: "Monitoreo",
     
     
-    tactical_modules: "Módulos de Acción Táctica",
+    tactical_modules: "Decision Studio",
     scenario_title: "Simulador de Escenarios de IA",
     scenario_desc: "Pruebe escenarios hipotéticos de multitudes para calcular patrones de redistribución y acciones de seguridad.",
     scenario_run: "Ejecutar",
@@ -258,6 +262,10 @@ export const translations = {
     directions_status: "Estado de la API de Direcciones",
     directions_delay: "Retraso",
     directions_suggestion: "Sugerencia de IA",
+    status_banner_title: "Estado Operativo Actual",
+    status_banner_normal: "La IA está monitoreando 42 flujos de telemetría en vivo. No se requiere intervención inmediata.",
+    status_banner_active: "ATENCIÓN REQUERIDA",
+    status_banner_investigating: "CrowdFlow AI está investigando la congestión de",
   },
   fr: {
     
@@ -310,10 +318,10 @@ export const translations = {
     inspector_clear: "Effacer la Sélection de l'Inspecteur",
     
     
-    rec_title: "Recommandations de Commandement IA",
+    rec_title: "Orchestrateur IA",
     rec_safety: "Indice de Sécurité",
     rec_efficiency: "Score d'Efficacité",
-    rec_run_analysis: "Lancer l'Analyse",
+    rec_run_analysis: "Consulter l'Orchestrateur IA",
     rec_no_active: "Aucune Recommandation Active",
     rec_no_active_desc: "L'analyse périodique en arrière-plan est suspendue. Cliquez sur le bouton ci-dessous pour invoquer manuellement l'Orchestrateur.",
     rec_trigger: "Déclencher l'Orchestrateur IA",
@@ -330,7 +338,7 @@ export const translations = {
     rec_stabilized: "Congestion actuelle réduite de 21%.",
     
     
-    feed_title: "Flux de Mission IA",
+    feed_title: "Flux de Mission",
     feed_no_items: "Aucun élément de mission actif",
     feed_obs: "Observation",
     feed_reason: "Raisonnement",
@@ -339,7 +347,7 @@ export const translations = {
     feed_monitoring: "Surveillance",
     
     
-    tactical_modules: "Modules d'Action Tactique",
+    tactical_modules: "Decision Studio",
     scenario_title: "Simulateur de Scénarios IA",
     scenario_desc: "Testez des scénarios de foule hypothétiques pour calculer les modèles de redistribution et les actions de sécurité.",
     scenario_run: "Lancer",
@@ -387,6 +395,10 @@ export const translations = {
     directions_status: "Statut API Itinéraire",
     directions_delay: "Retard",
     directions_suggestion: "Suggestion de l'IA",
+    status_banner_title: "Statut Opérationnel Actuel",
+    status_banner_normal: "L'IA surveille 42 flux de télémétrie en direct. Aucune intervention immédiate requise.",
+    status_banner_active: "ATTENTION REQUISE",
+    status_banner_investigating: "CrowdFlow AI enquête sur la congestion de",
   },
   hi: {
     
@@ -439,10 +451,10 @@ export const translations = {
     inspector_clear: "निरीक्षक चयन साफ़ करें",
     
     
-    rec_title: "एआई कमांड सिफारिशें",
+    rec_title: "एआई ऑर्केस्ट्रेटर",
     rec_safety: "सुरक्षा सूचकांक",
     rec_efficiency: "दक्षता स्कोर",
-    rec_run_analysis: "एआई विश्लेषण चलाएं",
+    rec_run_analysis: "एआई ऑर्केस्ट्रेटर से परामर्श करें",
     rec_no_active: "कोई सक्रिय सिफारिशें नहीं",
     rec_no_active_desc: "एपीआई सीमा को बचाने के लिए पृष्ठभूमि विश्लेषण निलंबित है। एआई आर्केस्ट्रेटर को मैन्युअल रूप से कॉल करने के लिए बटन पर क्लिक करें।",
     rec_trigger: "एआई ऑर्केस्ट्रेटर ट्रिगर करें",
@@ -459,7 +471,7 @@ export const translations = {
     rec_stabilized: "वर्तमान भीड़ में 21% की कमी आई है।",
     
     
-    feed_title: "एआई मिशन फ़ीड",
+    feed_title: "मिशन फ़ीड",
     feed_no_items: "कोई मिशन आइटम सक्रिय नहीं",
     feed_obs: "अवलोकन",
     feed_reason: "तर्क",
@@ -468,7 +480,7 @@ export const translations = {
     feed_monitoring: "निगरानी",
     
     
-    tactical_modules: "सामरिक कार्रवाई मॉड्यूल",
+    tactical_modules: "डिसीजन स्टूडियो",
     scenario_title: "एआई परिदृश्य सिम्युलेटर",
     scenario_desc: "पुनर्वितरण पैटर्न और सुरक्षा कार्यों की गणना करने के लिए काल्पनिक भीड़ परिदृश्यों का परीक्षण करें।",
     scenario_run: "चलाएं",
@@ -516,5 +528,9 @@ export const translations = {
     directions_status: "दिशा-निर्देश एपीआई स्थिति",
     directions_delay: "विलंब",
     directions_suggestion: "एआई सुझाव",
+    status_banner_title: "वर्तमान परिचालन स्थिति",
+    status_banner_normal: "एआई 42 लाइव टेलीमेट्री स्ट्रीम की निगरानी कर रहा है। तत्काल किसी हस्तक्षेप की आवश्यकता नहीं है।",
+    status_banner_active: "ध्यान देने की आवश्यकता है",
+    status_banner_investigating: "भीड़ नियंत्रण एआई जांच कर रहा है:",
   }
 };

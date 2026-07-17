@@ -84,6 +84,21 @@ export const ActionQueue: React.FC = () => {
           Perceive ➔ Reason ➔ Act loop. Proposed interventions are evaluated by Governance before execution.
         </p>
 
+        <div className="grid grid-cols-3 gap-2 bg-slate-900/50 border border-white/5 rounded-xl p-2.5 mb-4 text-center select-none">
+          <div>
+            <span className="text-[8px] text-gray-500 font-bold uppercase block tracking-wider mb-0.5">AI Decisions</span>
+            <span className="text-sm font-black text-gray-200">42</span>
+          </div>
+          <div className="border-x border-white/5">
+            <span className="text-[8px] text-gray-500 font-bold uppercase block tracking-wider mb-0.5">Success Rate</span>
+            <span className="text-sm font-black text-emerald-400">93%</span>
+          </div>
+          <div>
+            <span className="text-[8px] text-gray-500 font-bold uppercase block tracking-wider mb-0.5">Confidence</span>
+            <span className="text-sm font-black text-fifa-gold">91%</span>
+          </div>
+        </div>
+
         {}
         <div className="space-y-4 max-h-[380px] overflow-y-auto pr-1">
           {sortedActions.length === 0 ? (

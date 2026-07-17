@@ -15,6 +15,10 @@ export const StadiumMap: React.FC = () => {
   } = useCrowdPilot();
 
   const [hoveredGate, setHoveredGate] = useState<string | null>(null);
+  const [showCrowd, setShowCrowd] = useState(true);
+  const [showAIPaths, setShowAIPaths] = useState(true);
+  const [showResources, setShowResources] = useState(true);
+  const [showPredictions, setShowPredictions] = useState(true);
 
   if (!stadiumState) {
     return (
@@ -55,8 +59,8 @@ export const StadiumMap: React.FC = () => {
   };
 
   const getGateColorClass = (occupancy: number) => {
-    if (occupancy >= 90) return "fill-red-500 stroke-red-600 animate-pulse";
-    if (occupancy >= 75) return "fill-amber-500 stroke-amber-600";
+    if (occupancy >= 90) return "fill-red-500 stroke-red-600 gate-pulse";
+    if (occupancy >= 75) return "fill-amber-500 stroke-amber-600 gate-pulse";
     return "fill-emerald-500 stroke-emerald-600";
   };
 
@@ -137,11 +141,80 @@ export const StadiumMap: React.FC = () => {
     }
   };
 
+  const getDetourTarget = (srcGate: string) => {
+    const gateOptions = ["Gate A", "Gate B", "Gate C", "Gate D"].filter(g => g !== srcGate);
+    const neighbors: Record<string, string[]> = {
+      "Gate A": ["Gate B", "Gate D", "Gate C"],
+      "Gate B": ["Gate A", "Gate C", "Gate D"],
+      "Gate C": ["Gate B", "Gate D", "Gate A"],
+      "Gate D": ["Gate A", "Gate C", "Gate B"]
+    };
+    const srcNeighbors = neighbors[srcGate] || [];
+    const sorted = [...gateOptions].sort((g1, g2) => {
+      const occ1 = gates[g1]?.occupancy || 0;
+      const occ2 = gates[g2]?.occupancy || 0;
+      const isSafe1 = occ1 < 75;
+      const isSafe2 = occ2 < 75;
+      if (isSafe1 !== isSafe2) {
+        return isSafe1 ? -1 : 1;
+      }
+      if (occ1 !== occ2) {
+        return occ1 - occ2;
+      }
+      const distIndex1 = srcNeighbors.indexOf(g1);
+      const distIndex2 = srcNeighbors.indexOf(g2);
+      return distIndex1 - distIndex2;
+    });
+    return sorted[0];
+  };
+
+  const getDetourPathD = (src: string, target: string) => {
+    const coords: Record<string, { x: number, y: number }> = {
+      "Gate A": { x: 400, y: 70 },
+      "Gate B": { x: 700, y: 210 },
+      "Gate C": { x: 400, y: 350 },
+      "Gate D": { x: 100, y: 210 }
+    };
+    const p1 = coords[src];
+    const p2 = coords[target];
+    if (!p1 || !p2) return "";
+    let qx = (p1.x + p2.x) / 2;
+    let qy = (p1.y + p2.y) / 2;
+    if (src === "Gate B" && target === "Gate D") {
+      qx = 400; qy = 130;
+    } else if (src === "Gate D" && target === "Gate B") {
+      qx = 400; qy = 290;
+    } else if (src === "Gate A" && target === "Gate C") {
+      qx = 480; qy = 210;
+    } else if (src === "Gate C" && target === "Gate A") {
+      qx = 320; qy = 210;
+    } else {
+      if ((src === "Gate A" && target === "Gate B") || (src === "Gate B" && target === "Gate A")) {
+        qx = 580; qy = 100;
+      } else if ((src === "Gate B" && target === "Gate C") || (src === "Gate C" && target === "Gate B")) {
+        qx = 580; qy = 310;
+      } else if ((src === "Gate C" && target === "Gate D") || (src === "Gate D" && target === "Gate C")) {
+        qx = 220; qy = 310;
+      } else if ((src === "Gate D" && target === "Gate A") || (src === "Gate A" && target === "Gate D")) {
+        qx = 220; qy = 100;
+      }
+    }
+    return `M ${p1.x} ${p1.y} Q ${qx} ${qy} ${p2.x} ${p2.y}`;
+  };
+
+  const overloadedGates = Object.keys(gates).filter(g => (gates[g]?.occupancy || 0) >= 75);
+
+  const activeIncidents = (stadiumState?.incidents || []).filter((inc: any) => inc.status === "active");
+  const activeIncident = activeIncidents[0];
+  const incidentTitle = activeIncident?.title || "";
+  const isFire = incidentTitle.toLowerCase().includes("fire") || incidentTitle.toLowerCase().includes("evac");
+  const isMedical = incidentTitle.toLowerCase().includes("medical") || incidentTitle.toLowerCase().includes("health");
+  const isStorm = incidentTitle.toLowerCase().includes("storm") || incidentTitle.toLowerCase().includes("rain") || incidentTitle.toLowerCase().includes("lightning");
+  const isWhistle = incidentTitle.toLowerCase().includes("whistle") || incidentTitle.toLowerCase().includes("full-time") || incidentTitle.toLowerCase().includes("full time");
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {}
       <div className="lg:col-span-2 glass-panel rounded-2xl p-6 relative flex flex-col items-center justify-between min-h-[460px]">
-        {}
         <div className="w-full flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold tracking-wide text-gray-100 flex items-center gap-2">
@@ -165,18 +238,42 @@ export const StadiumMap: React.FC = () => {
           </div>
         </div>
 
-        {}
+        <div className="absolute top-16 right-6 z-10 flex flex-wrap gap-1.5 bg-slate-950/90 border border-white/10 p-1.5 rounded-xl text-[9px] font-bold text-gray-300 shadow-xl">
+          <button 
+            onClick={() => setShowCrowd(!showCrowd)}
+            className={`px-2 py-1 rounded transition-colors ${showCrowd ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-slate-900 text-gray-500 border border-transparent"}`}
+          >
+            ● Crowd
+          </button>
+          <button 
+            onClick={() => setShowAIPaths(!showAIPaths)}
+            className={`px-2 py-1 rounded transition-colors ${showAIPaths ? "bg-fifa-gold/20 text-fifa-gold border border-fifa-gold/30" : "bg-slate-900 text-gray-500 border border-transparent"}`}
+          >
+            ➔ AI Detour
+          </button>
+          <button 
+            onClick={() => setShowResources(!showResources)}
+            className={`px-2 py-1 rounded transition-colors ${showResources ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" : "bg-slate-900 text-gray-500 border border-transparent"}`}
+          >
+            👮 Staff
+          </button>
+          <button 
+            onClick={() => setShowPredictions(!showPredictions)}
+            className={`px-2 py-1 rounded transition-colors ${showPredictions ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "bg-slate-900 text-gray-500 border border-transparent"}`}
+          >
+            ⇢ Predict
+          </button>
+        </div>
+
         <svg viewBox="0 0 800 420" className="w-full max-w-[600px] drop-shadow-[0_0_30px_rgba(15,30,54,0.3)]">
           <ellipse cx="400" cy="210" rx="360" ry="170" className="fill-none stroke-slate-800 stroke-[2] stroke-dasharray-4" />
           <ellipse cx="400" cy="210" rx="300" ry="140" className="fill-slate-900/60 stroke-slate-700/80 stroke-[3]" />
           <ellipse cx="400" cy="210" rx="240" ry="110" className="fill-slate-950/40 stroke-slate-800 stroke-[2]" />
           
-          {}
           <rect x="290" y="145" width="220" height="130" rx="6" className="fill-slate-900/90 stroke-slate-700 stroke-[1.5]" />
           <ellipse cx="400" cy="210" rx="30" ry="30" className="fill-none stroke-slate-800 stroke-[1.5]" />
           <line x1="400" y1="145" x2="400" y2="275" className="stroke-slate-800 stroke-[1.5]" />
           
-          {}
           <g 
             className="cursor-pointer group" 
             onClick={() => setSelectedGate("Gate A")}
@@ -205,7 +302,6 @@ export const StadiumMap: React.FC = () => {
             )}
           </g>
 
-          {}
           <g 
             className="cursor-pointer group" 
             onClick={() => setSelectedGate("Gate B")}
@@ -234,7 +330,6 @@ export const StadiumMap: React.FC = () => {
             )}
           </g>
 
-          {}
           <g 
             className="cursor-pointer group" 
             onClick={() => setSelectedGate("Gate C")}
@@ -263,7 +358,6 @@ export const StadiumMap: React.FC = () => {
             )}
           </g>
 
-          {}
           <g 
             className="cursor-pointer group" 
             onClick={() => setSelectedGate("Gate D")}
@@ -298,27 +392,159 @@ export const StadiumMap: React.FC = () => {
                 stroke-dashoffset: -20;
               }
             }
+            @keyframes strokePulse {
+              0% {
+                stroke-width: 2px;
+                stroke-opacity: 0.8;
+              }
+              50% {
+                stroke-width: 6px;
+                stroke-opacity: 1;
+              }
+              100% {
+                stroke-width: 2px;
+                stroke-opacity: 0.8;
+              }
+            }
+            .gate-pulse {
+              animation: strokePulse 1.8s infinite ease-in-out;
+            }
           `}</style>
 
-          {}
-          {gates["Gate B"]?.occupancy >= 90 && (
+          {showCrowd && isWhistle && (
             <g>
-              <path
-                d="M 700 210 Q 400 130 100 210"
-                fill="none"
-                stroke="#eab308"
-                strokeWidth="2"
-                strokeDasharray="5,5"
-                className="stroke-fifa-gold animate-[dash_2s_linear_infinite]"
-                style={{ opacity: 0.7 }}
-              />
-              <text x="400" y="145" textAnchor="middle" className="fill-fifa-gold font-mono text-[9px] font-bold tracking-wider animate-pulse">
-                ⚠️ SPILLOVER FLOW PREDICTED (B ➔ D)
-              </text>
+              <circle r="3" fill="#10b981"><animateMotion dur="2.5s" repeatCount="indefinite" path="M 400 210 L 400 70" /></circle>
+              <circle r="3" fill="#10b981"><animateMotion dur="2.5s" begin="0.8s" repeatCount="indefinite" path="M 400 210 L 400 70" /></circle>
+              <circle r="3" fill="#10b981"><animateMotion dur="2s" repeatCount="indefinite" path="M 400 210 L 700 210" /></circle>
+              <circle r="3" fill="#10b981"><animateMotion dur="2s" begin="0.6s" repeatCount="indefinite" path="M 400 210 L 700 210" /></circle>
+              <circle r="3" fill="#10b981"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 400 210 L 400 350" /></circle>
+              <circle r="3" fill="#10b981"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 400 210 L 100 210" /></circle>
             </g>
           )}
 
-          {}
+          {showCrowd && isFire && (
+            <g>
+              <circle r="3.5" fill="#ef4444"><animateMotion dur="2s" repeatCount="indefinite" path="M 700 210 Q 550 350 400 350" /></circle>
+              <circle r="3.5" fill="#ef4444"><animateMotion dur="2s" begin="1s" repeatCount="indefinite" path="M 700 210 Q 550 350 400 350" /></circle>
+              <circle r="3.5" fill="#ef4444"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 700 210 Q 400 120 100 210" /></circle>
+            </g>
+          )}
+
+          {showCrowd && isStorm && (
+            <g>
+              <circle r="3" fill="#3b82f6"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              <circle r="3" fill="#3b82f6"><animateMotion dur="1.1s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
+              <circle r="3" fill="#3b82f6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
+              <circle r="3" fill="#3b82f6"><animateMotion dur="1.0s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
+            </g>
+          )}
+
+          {showCrowd && !isWhistle && !isFire && !isStorm && (
+            <g>
+              <circle r="2.5" fill="#10b981"><animateMotion dur="3.5s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              <circle r="2.5" fill="#10b981"><animateMotion dur="3.5s" begin="1.75s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              <circle r="2.5" fill="#10b981"><animateMotion dur="3.2s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
+              <circle r="2.5" fill="#10b981"><animateMotion dur="3.2s" begin="1.6s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
+              <circle r="2.5" fill="#10b981"><animateMotion dur="3.8s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
+              <circle r="2.5" fill="#10b981"><animateMotion dur="3.0s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
+            </g>
+          )}
+
+          {showAIPaths && overloadedGates.map((srcGate) => {
+            const targetGate = getDetourTarget(srcGate);
+            if (!targetGate) return null;
+            const pathD = getDetourPathD(srcGate, targetGate);
+            const coords: Record<string, { x: number, y: number }> = {
+              "Gate A": { x: 400, y: 70 },
+              "Gate B": { x: 700, y: 210 },
+              "Gate C": { x: 400, y: 350 },
+              "Gate D": { x: 100, y: 210 }
+            };
+            const p1 = coords[srcGate];
+            const p2 = coords[targetGate];
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2 - 10;
+            return (
+              <g key={`detour-${srcGate}`}>
+                <path
+                  id={`ai-detour-${srcGate}`}
+                  d={pathD}
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="2.5"
+                  strokeDasharray="4,4"
+                  filter="drop-shadow(0 0 4px rgba(16,185,129,0.5))"
+                  className="animate-[dash_1.5s_linear_infinite]"
+                />
+                <circle r="4.5" fill="#10b981" filter="drop-shadow(0 0 3px #10b981)">
+                  <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} />
+                </circle>
+                <circle r="4.5" fill="#10b981" filter="drop-shadow(0 0 3px #10b981)">
+                  <animateMotion dur="3.5s" begin="1.7s" repeatCount="indefinite" path={pathD} />
+                </circle>
+                <text x={midX} y={midY} textAnchor="middle" className="fill-emerald-400 font-black text-[8px] uppercase tracking-wider animate-pulse">
+                  🟢 AI DETOUR: {srcGate.replace("Gate ", "")} ➔ {targetGate.replace("Gate ", "")}
+                </text>
+              </g>
+            );
+          })}
+
+          {showPredictions && overloadedGates.map((srcGate) => {
+            const targetGate = getDetourTarget(srcGate);
+            if (!targetGate) return null;
+            const coords: Record<string, { x: number, y: number }> = {
+              "Gate A": { x: 400, y: 70 },
+              "Gate B": { x: 700, y: 210 },
+              "Gate C": { x: 400, y: 350 },
+              "Gate D": { x: 100, y: 210 }
+            };
+            const p1 = coords[srcGate];
+            const p2 = coords[targetGate];
+            const pathD = `M ${p1.x} ${p1.y} A 330 160 0 0 1 ${p2.x} ${p2.y}`;
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2 + 15;
+            return (
+              <g key={`spill-${srcGate}`}>
+                <path
+                  d={pathD}
+                  fill="none"
+                  stroke="#f59e0b"
+                  strokeWidth="2"
+                  strokeDasharray="5,5"
+                  className="animate-[dash_2s_linear_infinite]"
+                />
+                <circle r="3.5" fill="#f59e0b">
+                  <animateMotion dur="4s" repeatCount="indefinite" path={pathD} />
+                </circle>
+                <text x={midX} y={midY} textAnchor="middle" className="fill-amber-500 font-black text-[7.5px] uppercase tracking-wider">
+                  ⇢ Predict Spill: {srcGate.replace("Gate ", "")} ➔ {targetGate.replace("Gate ", "")}
+                </text>
+              </g>
+            );
+          })}
+
+          {isFire && (
+            <g>
+              <circle cx="580" cy="130" r="22" fill="#ef4444" fillOpacity="0.15" stroke="#ef4444" strokeWidth="1" className="animate-ping" style={{ transformOrigin: "580px 130px" }} />
+              <text x="580" y="138" textAnchor="middle" className="text-xl">🔥</text>
+              <text x="580" y="100" textAnchor="middle" className="fill-red-400 font-black text-[9px] uppercase tracking-wider">EVAC ZONE</text>
+            </g>
+          )}
+
+          {isStorm && (
+            <g>
+              <text x="200" y="50" className="text-xl opacity-75 animate-bounce">⚡</text>
+              <text x="600" y="50" className="text-xl opacity-75 animate-bounce">☔</text>
+            </g>
+          )}
+
+          {isMedical && (
+            <g>
+              <circle cx="700" cy="210" r="25" fill="#ef4444" fillOpacity="0.1" stroke="#ef4444" strokeWidth="1.5" className="animate-ping" style={{ transformOrigin: "700px 210px" }} />
+              <text x="700" y="175" textAnchor="middle" className="fill-red-400 font-extrabold text-[9px] animate-pulse">⚠️ MEDICAL ALARM</text>
+            </g>
+          )}
+
           {selectedGate === "Gate B" && stadiumState?.sla_countdown !== undefined && stadiumState?.sla_countdown !== null && (
             <g transform="translate(700, 160)">
               <rect x="-35" y="-10" width="70" height="15" rx="3" className="fill-red-950/90 stroke stroke-red-500/50" />
@@ -328,8 +554,7 @@ export const StadiumMap: React.FC = () => {
             </g>
           )}
 
-          {}
-          {(stadiumState as any)?.assets?.map((asset: any) => (
+          {showResources && (stadiumState as any)?.assets?.map((asset: any) => (
             <g key={asset.id} className="transition-all duration-300">
               <circle
                 cx={asset.x}
@@ -356,6 +581,9 @@ export const StadiumMap: React.FC = () => {
                     : "fill-blue-500"
                 }
               />
+              <text x={asset.x} y={asset.y + 3} textAnchor="middle" className="text-[7px] font-bold fill-white">
+                {asset.type === "medic" ? "🚑" : asset.type === "shuttle" ? "🚌" : "👮"}
+              </text>
               <g transform={`translate(${asset.x - 35}, ${asset.y - 28})`}>
                 <rect
                   rx={4}
@@ -375,6 +603,16 @@ export const StadiumMap: React.FC = () => {
             </g>
           ))}
         </svg>
+
+        <div className="w-full grid grid-cols-4 sm:grid-cols-7 gap-2 bg-slate-950/40 border border-white/5 p-3 rounded-xl text-[9px] font-semibold text-gray-400 mt-4 select-none">
+          <div className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500 block"></span> Crowd Flow</div>
+          <div className="flex items-center gap-1"><span className="text-blue-400">👮</span> Police/Staff</div>
+          <div className="flex items-center gap-1"><span className="text-red-400">🚑</span> Medic Team</div>
+          <div className="flex items-center gap-1"><span className="text-emerald-400 font-bold">➔</span> AI Detour</div>
+          <div className="flex items-center gap-1"><span className="text-amber-500 font-bold">⇢</span> Predict Spill</div>
+          <div className="flex items-center gap-1"><span>⚠</span> Alarm Gate</div>
+          <div className="flex items-center gap-1"><span>🔥</span> Evac Hazard</div>
+        </div>
 
         {}
         <div className="w-full bg-slate-950/80 border border-white/5 rounded-2xl p-4 mt-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-inner">
@@ -485,15 +723,32 @@ export const StadiumMap: React.FC = () => {
                           </span>
                         </div>
                       )}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-3 gap-2 text-center bg-slate-950/60 p-2.5 rounded-xl border border-white/5 mt-2">
                         <div>
-                          <span className="text-[9px] text-fifa-gold font-bold uppercase tracking-wider block">{t.inspector_predicted}</span>
-                          <span className="text-base font-black text-gray-100">{pred.pred}% ± {pred.variance}%</span>
-                          <span className="text-[8px] text-gray-500 block">Confidence: {pred.confidence}%</span>
+                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-0.5">Prediction</span>
+                          <span className="text-xs font-black text-fifa-gold">{pred.pred}%</span>
+                          <span className="text-[7px] text-gray-600 block">Conf: {pred.confidence}%</span>
+                        </div>
+                        <div className="border-x border-white/5">
+                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-0.5">ETA</span>
+                          <span className="text-xs font-black text-gray-300">{pred.eta} min</span>
+                          <span className="text-[7px] text-gray-600 block">SLA Threshold</span>
                         </div>
                         <div>
-                          <span className="text-[9px] text-fifa-gold font-bold uppercase tracking-wider block">{t.inspector_eta}</span>
-                          <span className="text-base font-black text-gray-100">{pred.eta} min</span>
+                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-0.5">Trend</span>
+                          <span className={`text-[10px] font-black uppercase flex items-center justify-center gap-0.5 mt-0.5 ${
+                            pred.pred > (gates[selectedGate]?.occupancy || 0)
+                              ? "text-red-400"
+                              : pred.pred < (gates[selectedGate]?.occupancy || 0)
+                              ? "text-emerald-400"
+                              : "text-slate-400"
+                          }`}>
+                            {pred.pred > (gates[selectedGate]?.occupancy || 0)
+                              ? "▲ Rising"
+                              : pred.pred < (gates[selectedGate]?.occupancy || 0)
+                              ? "▼ Stable"
+                              : "▬ Constant"}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -535,10 +790,16 @@ export const StadiumMap: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-48 border border-dashed border-white/10 rounded-xl p-4 text-center text-gray-500">
-              <Users className="h-8 w-8 mb-2 opacity-30" />
-              <p className="text-sm">{t.inspector_no_gate}</p>
-              <p className="text-xs opacity-75 mt-1">{t.inspector_no_gate_desc}</p>
+            <div className="flex flex-col items-start justify-center h-[260px] border border-dashed border-white/10 rounded-xl p-5 text-gray-400 bg-slate-900/10">
+              <span className="text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-fifa-gold" /> {appLanguage === "es" ? "Seleccione una puerta para inspeccionar:" : appLanguage === "fr" ? "Sélectionnez une porte pour inspecter:" : appLanguage === "hi" ? "निरीक्षण करने के लिए एक गेट चुनें:" : "Select a gate to inspect:"}
+              </span>
+              <ul className="space-y-2 text-[11px] text-gray-400 pl-1">
+                <li>• {appLanguage === "es" ? "Carga de Ocupación" : appLanguage === "fr" ? "Charge d'occupation" : appLanguage === "hi" ? "अधिभोग लोड" : "Occupancy load"}</li>
+                <li>• {appLanguage === "es" ? "Tamaño de colas y flujos" : appLanguage === "fr" ? "Taille des files et débits" : appLanguage === "hi" ? "कतार का आकार और प्रवाह" : "Queue trends and arrival rates"}</li>
+                <li>• {appLanguage === "es" ? "Congestión prevista" : appLanguage === "fr" ? "Congestion prévue" : appLanguage === "hi" ? "अनुमानित भीड़" : "Predicted congestion thresholds"}</li>
+                <li>• {appLanguage === "es" ? "Recomendaciones de IA activas" : appLanguage === "fr" ? "Recommandations IA actives" : appLanguage === "hi" ? "सक्रिय एआई सिफारिशें" : "Active AI recommendations"}</li>
+              </ul>
             </div>
           )}
         </div>
