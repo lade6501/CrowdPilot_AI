@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-stadium-bg: #0B0F19;
+  --color-stadium-card: rgba(17, 24, 39, 0.65);
+  --color-stadium-border: rgba(255, 255, 255, 0.08);
+  --color-stadium-glow: rgba(204, 163, 82, 0.15);
+
+  --color-fifa-blue: #0F1E36;
+  --color-fifa-gold: #D4AF37;
+  --color-fifa-green: #10B981;
+  --color-fifa-red: #EF4444;
+  --color-fifa-yellow: #F59E0B;
+  --color-fifa-navy: #1E293B;
+
+  --font-sans: 'Inter', sans-serif;
+}
+
+@utility glass-panel {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+@utility glass-card {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@utility glass-card-hover {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.35);
+}
+
+@utility glass-input {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #f3f4f6;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+@utility glass-input-focus {
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+}
+
+@utility neon-border-green {
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+@utility neon-border-yellow {
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+@utility neon-border-red {
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+@utility text-glow-gold {
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+body {
+  background-color: var(--color-stadium-bg);
+  color: #f3f4f6;
+  font-family: var(--font-sans);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(15, 30, 54, 0.5) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(212, 175, 55, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(11, 15, 25, 0.95) 0px, rgba(11, 15, 25, 1) 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for timeline and details */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
