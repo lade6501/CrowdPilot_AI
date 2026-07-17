@@ -195,6 +195,26 @@ interface CrowdPilotContextType {
 
 const CrowdPilotContext = createContext<CrowdPilotContextType | undefined>(undefined);
 
+export const getBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL || (window as any).process?.env?.BASE_URL || "http://localhost:8000";
+  return envUrl.replace(/\/$/, "");
+};
+
+export const getWsUrl = () => {
+  const baseUrl = getBaseUrl();
+  if (baseUrl.startsWith("https://")) {
+    return baseUrl.replace("https://", "wss://");
+  }
+  if (baseUrl.startsWith("http://")) {
+    return baseUrl.replace("http://", "ws://");
+  }
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  return `${protocol}//${window.location.host}`;
+};
+
+const API_BASE = getBaseUrl();
+const WS_BASE = getWsUrl();
+
 export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [connected, setConnected] = useState<boolean>(false);
   const [tick, setTick] = useState<number>(0);
@@ -219,7 +239,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
   
   const updateAutonomyLevel = useCallback(async (level: string) => {
     try {
-      await fetch("http://localhost:8000/api/autonomy", {
+      await fetch(`${API_BASE}/api/autonomy`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ level }),
@@ -231,7 +251,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const approveAction = useCallback(async (actionId: string) => {
     try {
-      await fetch(`http://localhost:8000/api/actions/${actionId}/approve`, {
+      await fetch(`${API_BASE}/api/actions/${actionId}/approve`, {
         method: "POST",
       });
     } catch (e) {
@@ -241,7 +261,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const denyAction = useCallback(async (actionId: string) => {
     try {
-      await fetch(`http://localhost:8000/api/actions/${actionId}/deny`, {
+      await fetch(`${API_BASE}/api/actions/${actionId}/deny`, {
         method: "POST",
       });
     } catch (e) {
@@ -251,7 +271,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const deployScenarioPlan = useCallback(async (planSummary: string) => {
     try {
-      await fetch("http://localhost:8000/api/actions/deploy-plan", {
+      await fetch(`${API_BASE}/api/actions/deploy-plan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan_summary: planSummary }),
@@ -304,7 +324,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       return staticMap[targetLang][text];
     }
     try {
-      const res = await fetch("http://localhost:8000/api/translate", {
+      const res = await fetch(`${API_BASE}/api/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, target_lang: targetLang })
@@ -331,7 +351,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
     let reconnectTimeout: ReturnType<typeof setTimeout>;
 
     const connectWS = () => {
-      ws = new WebSocket("ws://localhost:8000/ws/events");
+      ws = new WebSocket(`${WS_BASE}/ws/events`);
 
       ws.onopen = () => {
         setConnected(true);
@@ -383,7 +403,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const selectReplaySlot = useCallback(async (slot: string) => {
     try {
-      const response = await fetch("http://localhost:8000/api/replay", {
+      const response = await fetch(`${API_BASE}/api/replay`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ time_slot: slot }),
@@ -398,7 +418,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const resetToLive = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/resume", {
+      const response = await fetch(`${API_BASE}/api/resume`, {
         method: "POST",
       });
       if (!response.ok) throw new Error("Resume shift failed");
@@ -412,7 +432,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
   const injectIncident = useCallback(async (incidentType: string) => {
     setInjectorLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/inject", {
+      const response = await fetch(`${API_BASE}/api/inject`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ incident_type: incidentType }),
@@ -439,7 +459,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
     setSimulationLoading(true);
     setSimulationResult(null);
     try {
-      const response = await fetch("http://localhost:8000/api/simulate", {
+      const response = await fetch(`${API_BASE}/api/simulate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scenario }),
@@ -463,7 +483,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
     setAnnouncementLoading(true);
     setAnnouncementResult(null);
     try {
-      const response = await fetch("http://localhost:8000/api/announcement", {
+      const response = await fetch(`${API_BASE}/api/announcement`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ situation, tone, audience }),
@@ -490,7 +510,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("http://localhost:8000/api/upload", {
+      const response = await fetch(`${API_BASE}/api/upload`, {
         method: "POST",
         body: formData,
       });
@@ -512,7 +532,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
   const triggerAI = useCallback(async () => {
     setOrchestrateLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/orchestrate", {
+      const response = await fetch(`${API_BASE}/api/orchestrate`, {
         method: "POST",
       });
       if (!response.ok) throw new Error("Manual AI orchestration failed");

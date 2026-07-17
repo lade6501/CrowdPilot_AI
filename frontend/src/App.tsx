@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CrowdPilotProvider, useCrowdPilot } from "./context/CrowdPilotContext";
+import { CrowdPilotProvider, useCrowdPilot, getBaseUrl } from "./context/CrowdPilotContext";
 import { StadiumMap } from "./components/StadiumMap";
 import { LiveTimeline } from "./components/LiveTimeline";
 import { Recommendation } from "./components/Recommendation";
@@ -62,7 +62,7 @@ const DashboardContent: React.FC = () => {
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/status");
+        const res = await fetch(`${getBaseUrl()}/api/status`);
         if (res.ok) {
           const data = await res.json();
           setApiConfigured(data.gemini_api_configured);
