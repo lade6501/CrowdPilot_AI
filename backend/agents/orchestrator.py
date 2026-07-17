@@ -83,6 +83,23 @@ class OrchestratorAgent(BaseAgent):
             logger.error(f"Gemini API Error in Central Orchestrator: {e}. Activating mock fallback generator.")
             raise e
 
+def get_best_detour_gate(src_gate: str, gates: dict) -> str:
+    gate_options = [g for g in ["Gate A", "Gate B", "Gate C", "Gate D"] if g != src_gate]
+    neighbors = {
+        "Gate A": ["Gate B", "Gate D", "Gate C"],
+        "Gate B": ["Gate A", "Gate C", "Gate D"],
+        "Gate C": ["Gate B", "Gate D", "Gate A"],
+        "Gate D": ["Gate A", "Gate C", "Gate B"]
+    }
+    src_neighbors = neighbors.get(src_gate, [])
+    def sort_key(g):
+        occ = gates.get(g, {}).get("occupancy", 0)
+        is_safe = 0 if occ < 75 else 1
+        dist_idx = src_neighbors.index(g) if g in src_neighbors else 99
+        return (is_safe, occ, dist_idx)
+    gate_options.sort(key=sort_key)
+    return gate_options[0] if gate_options else "Gate D"
+
 def get_mock_fallback_summary(stadium_state: dict) -> OperationsSummary:
     gates = stadium_state.get("gates", {})
     parking = stadium_state.get("parking", {})
@@ -174,7 +191,7 @@ def get_mock_fallback_summary(stadium_state: dict) -> OperationsSummary:
         if g_occ >= 90:
             is_fire_g = g_name == "Gate B" and any("fire" in inc.get("title", "").lower() for inc in incidents)
             if not is_fire_g:
-                target_alt = "Gate D" if g_name == "Gate B" else ("Gate B" if g_name == "Gate A" else "Gate D")
+                target_alt = get_best_detour_gate(g_name, gates)
                 recs.append(RecommendationItem(
                     id=f"rec_fallback_{g_name.lower().replace(' ', '_')}",
                     title=f"{g_name} Congestion Diversion",

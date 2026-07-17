@@ -59,8 +59,8 @@ export const StadiumMap: React.FC = () => {
   };
 
   const getGateColorClass = (occupancy: number) => {
-    if (occupancy >= 90) return "fill-red-500 stroke-red-600 gate-pulse";
-    if (occupancy >= 75) return "fill-amber-500 stroke-amber-600 gate-pulse";
+    if (occupancy >= 90) return "fill-red-500 stroke-red-600 gate-critical-pulse";
+    if (occupancy >= 75) return "fill-amber-500 stroke-amber-600 gate-warning-pulse";
     return "fill-emerald-500 stroke-emerald-600";
   };
 
@@ -203,6 +203,7 @@ export const StadiumMap: React.FC = () => {
   };
 
   const overloadedGates = Object.keys(gates).filter(g => (gates[g]?.occupancy || 0) >= 75);
+  const criticalGates = Object.keys(gates).filter(g => (gates[g]?.occupancy || 0) >= 90);
 
   const activeIncidents = (stadiumState?.incidents || []).filter((inc: any) => inc.status === "active");
   const activeIncident = activeIncidents[0];
@@ -392,61 +393,92 @@ export const StadiumMap: React.FC = () => {
                 stroke-dashoffset: -20;
               }
             }
-            @keyframes strokePulse {
-              0% {
-                stroke-width: 2px;
-                stroke-opacity: 0.8;
-              }
-              50% {
-                stroke-width: 6px;
-                stroke-opacity: 1;
-              }
-              100% {
-                stroke-width: 2px;
-                stroke-opacity: 0.8;
-              }
+            @keyframes criticalPulse {
+              0% { stroke-width: 2px; stroke-opacity: 0.9; }
+              50% { stroke-width: 7px; stroke-opacity: 1; filter: drop-shadow(0 0 5px #ef4444); }
+              100% { stroke-width: 2px; stroke-opacity: 0.9; }
             }
-            .gate-pulse {
-              animation: strokePulse 1.8s infinite ease-in-out;
+            @keyframes warningBreath {
+              0% { stroke-width: 2px; stroke-opacity: 0.7; }
+              50% { stroke-width: 5px; stroke-opacity: 0.9; filter: drop-shadow(0 0 3px #f59e0b); }
+              100% { stroke-width: 2px; stroke-opacity: 0.7; }
+            }
+            .gate-critical-pulse {
+              animation: criticalPulse 0.8s infinite ease-in-out;
+            }
+            .gate-warning-pulse {
+              animation: warningBreath 2.2s infinite ease-in-out;
             }
           `}</style>
 
           {showCrowd && isWhistle && (
             <g>
-              <circle r="3" fill="#10b981"><animateMotion dur="2.5s" repeatCount="indefinite" path="M 400 210 L 400 70" /></circle>
-              <circle r="3" fill="#10b981"><animateMotion dur="2.5s" begin="0.8s" repeatCount="indefinite" path="M 400 210 L 400 70" /></circle>
-              <circle r="3" fill="#10b981"><animateMotion dur="2s" repeatCount="indefinite" path="M 400 210 L 700 210" /></circle>
-              <circle r="3" fill="#10b981"><animateMotion dur="2s" begin="0.6s" repeatCount="indefinite" path="M 400 210 L 700 210" /></circle>
-              <circle r="3" fill="#10b981"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 400 210 L 400 350" /></circle>
-              <circle r="3" fill="#10b981"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 400 210 L 100 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5s" repeatCount="indefinite" path="M 400 210 L 400 70" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5s" begin="1.25s" repeatCount="indefinite" path="M 400 210 L 400 70" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5s" begin="2.5s" repeatCount="indefinite" path="M 400 210 L 400 70" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5s" begin="3.75s" repeatCount="indefinite" path="M 400 210 L 400 70" /></circle>
+              
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.8s" repeatCount="indefinite" path="M 400 210 L 700 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.8s" begin="1.2s" repeatCount="indefinite" path="M 400 210 L 700 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.8s" begin="2.4s" repeatCount="indefinite" path="M 400 210 L 700 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.8s" begin="3.6s" repeatCount="indefinite" path="M 400 210 L 700 210" /></circle>
+              
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.2s" repeatCount="indefinite" path="M 400 210 L 400 350" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.2s" begin="1.3s" repeatCount="indefinite" path="M 400 210 L 400 350" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.2s" begin="2.6s" repeatCount="indefinite" path="M 400 210 L 400 350" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.2s" begin="3.9s" repeatCount="indefinite" path="M 400 210 L 400 350" /></circle>
+              
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.5s" repeatCount="indefinite" path="M 400 210 L 100 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.5s" begin="1.5s" repeatCount="indefinite" path="M 400 210 L 100 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.5s" begin="3s" repeatCount="indefinite" path="M 400 210 L 100 210" /></circle>
             </g>
           )}
 
           {showCrowd && isFire && (
             <g>
-              <circle r="3.5" fill="#ef4444"><animateMotion dur="2s" repeatCount="indefinite" path="M 700 210 Q 550 350 400 350" /></circle>
-              <circle r="3.5" fill="#ef4444"><animateMotion dur="2s" begin="1s" repeatCount="indefinite" path="M 700 210 Q 550 350 400 350" /></circle>
-              <circle r="3.5" fill="#ef4444"><animateMotion dur="2.8s" repeatCount="indefinite" path="M 700 210 Q 400 120 100 210" /></circle>
+              <circle r="1.2" fill="#ef4444"><animateMotion dur="5s" repeatCount="indefinite" path="M 700 210 Q 550 350 400 350" /></circle>
+              <circle r="1.2" fill="#ef4444"><animateMotion dur="5s" begin="1.66s" repeatCount="indefinite" path="M 700 210 Q 550 350 400 350" /></circle>
+              <circle r="1.2" fill="#ef4444"><animateMotion dur="5s" begin="3.33s" repeatCount="indefinite" path="M 700 210 Q 550 350 400 350" /></circle>
+              <circle r="1.2" fill="#ef4444"><animateMotion dur="5.8s" repeatCount="indefinite" path="M 700 210 Q 400 120 100 210" /></circle>
+              <circle r="1.2" fill="#ef4444"><animateMotion dur="5.8s" begin="2.9s" repeatCount="indefinite" path="M 700 210 Q 400 120 100 210" /></circle>
             </g>
           )}
 
           {showCrowd && isStorm && (
             <g>
-              <circle r="3" fill="#3b82f6"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
-              <circle r="3" fill="#3b82f6"><animateMotion dur="1.1s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
-              <circle r="3" fill="#3b82f6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
-              <circle r="3" fill="#3b82f6"><animateMotion dur="1.0s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
+              <circle r="1.2" fill="#3b82f6"><animateMotion dur="4s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              <circle r="1.2" fill="#3b82f6"><animateMotion dur="4s" begin="1.33s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              <circle r="1.2" fill="#3b82f6"><animateMotion dur="4s" begin="2.66s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              <circle r="1.2" fill="#3b82f6"><animateMotion dur="3.8s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
+              <circle r="1.2" fill="#3b82f6"><animateMotion dur="3.8s" begin="1.9s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
+              <circle r="1.2" fill="#3b82f6"><animateMotion dur="4.2s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
+              <circle r="1.2" fill="#3b82f6"><animateMotion dur="4.2s" begin="2.1s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
+              <circle r="1.2" fill="#3b82f6"><animateMotion dur="3.5s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
+              <circle r="1.2" fill="#3b82f6"><animateMotion dur="3.5s" begin="1.75s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
             </g>
           )}
 
           {showCrowd && !isWhistle && !isFire && !isStorm && (
             <g>
-              <circle r="2.5" fill="#10b981"><animateMotion dur="3.5s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
-              <circle r="2.5" fill="#10b981"><animateMotion dur="3.5s" begin="1.75s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
-              <circle r="2.5" fill="#10b981"><animateMotion dur="3.2s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
-              <circle r="2.5" fill="#10b981"><animateMotion dur="3.2s" begin="1.6s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
-              <circle r="2.5" fill="#10b981"><animateMotion dur="3.8s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
-              <circle r="2.5" fill="#10b981"><animateMotion dur="3.0s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.5s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.5s" begin="1.37s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.5s" begin="2.75s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.5s" begin="4.12s" repeatCount="indefinite" path="M 400 70 L 400 145" /></circle>
+              
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.2s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.2s" begin="1.3s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.2s" begin="2.6s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.2s" begin="3.9s" repeatCount="indefinite" path="M 700 210 L 510 210" /></circle>
+              
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.8s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.8s" begin="1.45s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.8s" begin="2.9s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="5.8s" begin="4.35s" repeatCount="indefinite" path="M 400 350 L 400 275" /></circle>
+              
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.9s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.9s" begin="1.22s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.9s" begin="2.44s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
+              <circle r="1.2" fill="#10b981"><animateMotion dur="4.9s" begin="3.66s" repeatCount="indefinite" path="M 100 210 L 290 210" /></circle>
             </g>
           )}
 
@@ -463,7 +495,7 @@ export const StadiumMap: React.FC = () => {
             const p1 = coords[srcGate];
             const p2 = coords[targetGate];
             const midX = (p1.x + p2.x) / 2;
-            const midY = (p1.y + p2.y) / 2 - 10;
+            const midY = (p1.y + p2.y) / 2 - 14;
             return (
               <g key={`detour-${srcGate}`}>
                 <path
@@ -473,18 +505,31 @@ export const StadiumMap: React.FC = () => {
                   stroke="#10b981"
                   strokeWidth="2.5"
                   strokeDasharray="4,4"
-                  filter="drop-shadow(0 0 4px rgba(16,185,129,0.5))"
+                  filter="drop-shadow(0 0 5px rgba(16,185,129,0.7))"
                   className="animate-[dash_1.5s_linear_infinite]"
                 />
-                <circle r="4.5" fill="#10b981" filter="drop-shadow(0 0 3px #10b981)">
-                  <animateMotion dur="3.5s" repeatCount="indefinite" path={pathD} />
+                
+                <circle r="5" fill="#10b981" filter="drop-shadow(0 0 4px #10b981)">
+                  <animateMotion dur="2.2s" repeatCount="indefinite" path={pathD} />
                 </circle>
-                <circle r="4.5" fill="#10b981" filter="drop-shadow(0 0 3px #10b981)">
-                  <animateMotion dur="3.5s" begin="1.7s" repeatCount="indefinite" path={pathD} />
-                </circle>
-                <text x={midX} y={midY} textAnchor="middle" className="fill-emerald-400 font-black text-[8px] uppercase tracking-wider animate-pulse">
-                  🟢 AI DETOUR: {srcGate.replace("Gate ", "")} ➔ {targetGate.replace("Gate ", "")}
-                </text>
+
+                {showCrowd && (
+                  <g>
+                    <circle r="1.2" fill="#10b981"><animateMotion dur="5s" repeatCount="indefinite" path={pathD} /></circle>
+                    <circle r="1.2" fill="#10b981"><animateMotion dur="5s" begin="1.66s" repeatCount="indefinite" path={pathD} /></circle>
+                    <circle r="1.2" fill="#10b981"><animateMotion dur="5s" begin="3.33s" repeatCount="indefinite" path={pathD} /></circle>
+                  </g>
+                )}
+
+                <g transform={`translate(${midX - 55}, ${midY - 14})`}>
+                  <rect width="110" height="26" rx="4" className="fill-slate-950/90 stroke stroke-emerald-500/20" />
+                  <text x="55" y="10" textAnchor="middle" className="fill-emerald-400 font-extrabold text-[6.5px] uppercase tracking-wider">
+                    AI DETOUR ACTIVE
+                  </text>
+                  <text x="55" y="18" textAnchor="middle" className="fill-gray-300 font-bold text-[6px]">
+                    Redirecting: 35% | Bottleneck: -24%
+                  </text>
+                </g>
               </g>
             );
           })}
@@ -513,10 +558,12 @@ export const StadiumMap: React.FC = () => {
                   strokeDasharray="5,5"
                   className="animate-[dash_2s_linear_infinite]"
                 />
-                <circle r="3.5" fill="#f59e0b">
-                  <animateMotion dur="4s" repeatCount="indefinite" path={pathD} />
+                
+                <circle r="3" fill="#f59e0b">
+                  <animateMotion dur="9s" repeatCount="indefinite" path={pathD} />
                 </circle>
-                <text x={midX} y={midY} textAnchor="middle" className="fill-amber-500 font-black text-[7.5px] uppercase tracking-wider">
+                
+                <text x={midX} y={midY} textAnchor="middle" className="fill-amber-500 font-black text-[7.5px] uppercase tracking-wider bg-slate-950/80 px-1 rounded">
                   ⇢ Predict Spill: {srcGate.replace("Gate ", "")} ➔ {targetGate.replace("Gate ", "")}
                 </text>
               </g>
@@ -527,7 +574,7 @@ export const StadiumMap: React.FC = () => {
             <g>
               <circle cx="580" cy="130" r="22" fill="#ef4444" fillOpacity="0.15" stroke="#ef4444" strokeWidth="1" className="animate-ping" style={{ transformOrigin: "580px 130px" }} />
               <text x="580" y="138" textAnchor="middle" className="text-xl">🔥</text>
-              <text x="580" y="100" textAnchor="middle" className="fill-red-400 font-black text-[9px] uppercase tracking-wider">EVAC ZONE</text>
+              <text x="580" y="100" textAnchor="middle" className="fill-red-400 font-black text-[9px] uppercase tracking-wider animate-pulse">EVAC ZONE</text>
             </g>
           )}
 
@@ -544,6 +591,23 @@ export const StadiumMap: React.FC = () => {
               <text x="700" y="175" textAnchor="middle" className="fill-red-400 font-extrabold text-[9px] animate-pulse">⚠️ MEDICAL ALARM</text>
             </g>
           )}
+
+          {criticalGates.map((gateName) => {
+            const coords: Record<string, { x: number, y: number }> = {
+              "Gate A": { x: 400, y: 70 },
+              "Gate B": { x: 700, y: 210 },
+              "Gate C": { x: 400, y: 350 },
+              "Gate D": { x: 100, y: 210 }
+            };
+            const pt = coords[gateName];
+            if (!pt) return null;
+            return (
+              <g key={`radar-${gateName}`}>
+                <circle cx={pt.x} cy={pt.y} r="28" fill="none" stroke="#ef4444" strokeWidth="1" strokeDasharray="3,3" className="animate-spin" style={{ transformOrigin: `${pt.x}px ${pt.y}px`, animationDuration: "12s" }} />
+                <circle cx={pt.x} cy={pt.y} r="35" fill="none" stroke="#ef4444" strokeWidth="1.5" strokeOpacity="0.4" className="animate-ping" style={{ transformOrigin: `${pt.x}px ${pt.y}px` }} />
+              </g>
+            );
+          })}
 
           {selectedGate === "Gate B" && stadiumState?.sla_countdown !== undefined && stadiumState?.sla_countdown !== null && (
             <g transform="translate(700, 160)">
@@ -580,9 +644,14 @@ export const StadiumMap: React.FC = () => {
                     ? "fill-purple-500"
                     : "fill-blue-500"
                 }
-              />
+              >
+                <animate attributeName="cx" from="400" to={asset.x} dur="2s" fill="freeze" />
+                <animate attributeName="cy" from="210" to={asset.y} dur="2s" fill="freeze" />
+              </circle>
               <text x={asset.x} y={asset.y + 3} textAnchor="middle" className="text-[7px] font-bold fill-white">
                 {asset.type === "medic" ? "🚑" : asset.type === "shuttle" ? "🚌" : "👮"}
+                <animate attributeName="x" from="400" to={asset.x} dur="2s" fill="freeze" />
+                <animate attributeName="y" from="213" to={asset.y + 3} dur="2s" fill="freeze" />
               </text>
               <g transform={`translate(${asset.x - 35}, ${asset.y - 28})`}>
                 <rect
@@ -615,10 +684,25 @@ export const StadiumMap: React.FC = () => {
         </div>
 
         {}
-        <div className="w-full bg-slate-950/80 border border-white/5 rounded-2xl p-4 mt-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-inner">
+        <div className={`w-full border rounded-2xl p-4 mt-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-inner transition-all duration-300 ${
+          stadiumState.mode === "replay" 
+            ? "bg-purple-950/45 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)]" 
+            : "bg-slate-950/80 border-white/5"
+        }`}>
           <div className="flex items-center gap-2 text-xs font-semibold text-gray-300">
-            <Clock className="h-4 w-4 text-fifa-gold" />
-            <span>{t.twin_timeline}</span>
+            {stadiumState.mode === "replay" ? (
+              <>
+                <Clock className="h-4 w-4 text-purple-400 animate-spin" style={{ animationDuration: "6s" }} />
+                <span className="text-purple-400 font-black tracking-wider uppercase animate-pulse">
+                  🔮 TIME TRAVEL HUD ACTIVE
+                </span>
+              </>
+            ) : (
+              <>
+                <Clock className="h-4 w-4 text-fifa-gold" />
+                <span>{t.twin_timeline}</span>
+              </>
+            )}
           </div>
 
           {}

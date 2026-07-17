@@ -6,6 +6,23 @@ from typing import List, Dict, Any
 
 logger = logging.getLogger("agentic_core")
 
+def get_best_detour_gate(src_gate: str, gates: dict) -> str:
+    gate_options = [g for g in ["Gate A", "Gate B", "Gate C", "Gate D"] if g != src_gate]
+    neighbors = {
+        "Gate A": ["Gate B", "Gate D", "Gate C"],
+        "Gate B": ["Gate A", "Gate C", "Gate D"],
+        "Gate C": ["Gate B", "Gate D", "Gate A"],
+        "Gate D": ["Gate A", "Gate C", "Gate B"]
+    }
+    src_neighbors = neighbors.get(src_gate, [])
+    def sort_key(g):
+        occ = gates.get(g, {}).get("occupancy", 0)
+        is_safe = 0 if occ < 75 else 1
+        dist_idx = src_neighbors.index(g) if g in src_neighbors else 99
+        return (is_safe, occ, dist_idx)
+    gate_options.sort(key=sort_key)
+    return gate_options[0] if gate_options else "Gate D"
+
 AGENT_REGISTRY = [
     {
         "id": "crowd_flow",
@@ -358,7 +375,7 @@ class AgenticManager:
                         
 
 
-                        target_spillover = "Gate D" if gate_name == "Gate B" else "Gate B"
+                        target_spillover = get_best_detour_gate(gate_name, stadium_state["gates"])
                         self.add_action_to_queue({
                             "proposer": "Crowd Flow Agent",
                             "why": f"{target_spillover} predicted to reach 85% in 3 min due to {gate_name} overflow (cascade spillover prediction)",
