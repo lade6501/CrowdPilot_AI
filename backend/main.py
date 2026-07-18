@@ -1,8 +1,5 @@
 import sys
 import os
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import asyncio
 import io
 import logging
@@ -11,6 +8,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, H
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import pandas as pd
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.config import config
 from backend.simulator import manager, start_simulator_loop, stadium_state, inject_incident, load_replay_preset
@@ -21,14 +20,11 @@ from backend.agents.communication import communication_agent
 logger = logging.getLogger("main")
 logging.basicConfig(level=logging.INFO)
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
     task = asyncio.create_task(start_simulator_loop())
     logger.info("FastAPI Server and Background Simulator started successfully.")
     yield
-
     task.cancel()
     try:
         await task
@@ -40,7 +36,6 @@ app = FastAPI(
     title="CrowdPilot AI - Stadium Operations Engine",
     lifespan=lifespan
 )
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -58,7 +53,6 @@ async def get_status():
         "gemini_api_configured": has_key,
         "mode": "live" if has_key else "mock"
     }
-
 
 class SimulateRequest(BaseModel):
     scenario: str = Field(..., json_schema_extra={"example": "What happens if Gate B closes?"})
@@ -134,7 +128,6 @@ async def post_orchestrate():
     try:
         from backend.simulator import trigger_ai_orchestration
         await trigger_ai_orchestration()
-
         await manager.broadcast({
             "type": "state_sync",
             "tick": stadium_state.get("tick", 0),
@@ -165,7 +158,6 @@ async def post_translate(req: TranslateRequest):
         target_name = lang_names.get(req.target_lang, "English")
         if target_name == "English":
             return {"translated_text": req.text}
-            
         prompt = f"Translate the following text to {target_name}:\n{req.text}"
         translated = agent.call_gemini_text(prompt)
         return {"translated_text": translated}
@@ -180,7 +172,6 @@ async def post_autonomy(req: AutonomyRequest):
         agentic_manager.update_autonomy(req.level)
         stadium_state["autonomy_level"] = agentic_manager.autonomy_level
         stadium_state["actions_queue"] = agentic_manager.get_actions()
-
         await manager.broadcast({
             "type": "state_sync",
             "tick": stadium_state.get("tick", 0),
@@ -197,7 +188,6 @@ async def post_approve_action(action_id: str):
         from backend.agents.agentic_core import agentic_manager
         agentic_manager.approve_action(action_id)
         stadium_state["actions_queue"] = agentic_manager.get_actions()
-
         await manager.broadcast({
             "type": "state_sync",
             "tick": stadium_state.get("tick", 0),
@@ -214,7 +204,6 @@ async def post_deny_action(action_id: str):
         from backend.agents.agentic_core import agentic_manager
         agentic_manager.deny_action(action_id)
         stadium_state["actions_queue"] = agentic_manager.get_actions()
-
         await manager.broadcast({
             "type": "state_sync",
             "tick": stadium_state.get("tick", 0),
@@ -231,7 +220,6 @@ async def post_deploy_plan(req: DeployPlanRequest):
         from backend.agents.agentic_core import agentic_manager
         agentic_manager.deploy_scenario_plan(req.plan_summary)
         stadium_state["actions_queue"] = agentic_manager.get_actions()
-
         await manager.broadcast({
             "type": "state_sync",
             "tick": stadium_state.get("tick", 0),
@@ -241,13 +229,12 @@ async def post_deploy_plan(req: DeployPlanRequest):
     except Exception as e:
         logger.error(f"Error deploying simulated plan: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 @app.post("/api/resume")
 async def post_resume():
     try:
         from backend.simulator import reset_simulator_to_live
         await reset_simulator_to_live()
-
         await manager.broadcast({
             "type": "state_sync",
             "tick": stadium_state.get("tick", 0),
@@ -257,42 +244,32 @@ async def post_resume():
     except Exception as e:
         logger.error(f"Error resuming simulator to live: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 @app.post("/api/upload")
 async def post_upload(file: UploadFile = File(...)):
     try:
-
         if not file.filename.lower().endswith('.csv'):
             raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
-            
         content = await file.read()
-        
-
         if len(content) > 2 * 1024 * 1024:
             raise HTTPException(status_code=400, detail="File size exceeds maximum limit of 2MB.")
-            
         df = pd.read_csv(io.BytesIO(content))
         df.columns = [c.strip().lower() for c in df.columns]
-        
         if "gate" not in df.columns or "occupancy" not in df.columns or "queue" not in df.columns:
             raise HTTPException(
                 status_code=400, 
                 detail="CSV must contain columns: 'gate', 'occupancy', and 'queue'."
             )
-            
         custom_gates = {}
         for idx, row in df.iterrows():
             g_val = str(row["gate"]).strip()
             if not g_val:
                 continue
             gate_name = g_val if g_val.lower().startswith("gate") else f"Gate {g_val}"
-            
             try:
                 occupancy = int(row["occupancy"])
                 queue = int(row["queue"])
                 flow_rate = int(row.get("flow_rate", 10))
-                
-
                 if not (0 <= occupancy <= 100):
                     raise ValueError(f"Occupancy must be between 0 and 100 (got {occupancy})")
                 if queue < 0:
@@ -304,13 +281,11 @@ async def post_upload(file: UploadFile = File(...)):
                     status_code=400,
                     detail=f"Malformed data on row {idx + 1}: {str(val_err)}"
                 )
-            
             custom_gates[gate_name] = {
                 "occupancy": occupancy,
                 "queue": queue,
                 "flow_rate": flow_rate
             }
-            
         custom_state = {
             "mode": "live",
             "timestamp": stadium_state["timestamp"],
@@ -331,30 +306,21 @@ async def post_upload(file: UploadFile = File(...)):
             ],
             "metro": stadium_state["metro"]
         }
-        
         result = await asyncio.to_thread(orchestrator_agent.orchestrate, custom_state)
-        
-
         from backend.agents.agentic_core import agentic_manager
         agentic_manager.calibration_diff = f"Gate B flow-rate threshold adjusted 15→18 p/m based on ingest of {len(custom_gates)} gate states."
         stadium_state["calibration_diff"] = agentic_manager.calibration_diff
-        
-
         stadium_state["actions_queue"] = agentic_manager.get_actions()
         stadium_state["autonomy_level"] = agentic_manager.autonomy_level
-        
-
         await manager.broadcast({
             "type": "state_sync",
             "tick": stadium_state.get("tick", 0),
             "state": stadium_state
         })
-
         return {
             "parsed_gates": custom_gates,
             "analysis": result
         }
-        
     except HTTPException as http_err:
         raise http_err
     except Exception as e:
@@ -381,7 +347,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     if payload.get("type") == "reset_to_live":
                         from backend.simulator import reset_simulator_to_live
                         await reset_simulator_to_live()
-
                         await websocket.send_json({
                             "type": "state_sync",
                             "tick": stadium_state.get("tick", 0),

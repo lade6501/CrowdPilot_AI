@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useCrowdPilot } from "../context/CrowdPilotContext";
+import { useCrowdPilot } from "../hooks/useCrowdPilot";
 import { translations } from "../utils/translations";
 import { Brain, ShieldCheck, Activity, CheckCircle, XCircle, Megaphone, Terminal, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

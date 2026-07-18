@@ -1,5 +1,5 @@
 import React from "react";
-import { useCrowdPilot } from "../context/CrowdPilotContext";
+import { useCrowdPilot } from "../hooks/useCrowdPilot";
 import { Shield, CheckCircle, XCircle, AlertTriangle, ShieldAlert, Cpu, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AITranslate } from "./AITranslate";

@@ -43,7 +43,6 @@ class OrchestratorAgent(BaseAgent):
         )
 
     def orchestrate(self, stadium_state: dict) -> OperationsSummary:
-
         logger_ref = "Orchestrator dispatching tasks to specialists..."
         print(logger_ref)
         
@@ -53,15 +52,9 @@ class OrchestratorAgent(BaseAgent):
         incidents = stadium_state.get("incidents", [])
         metro = stadium_state.get("metro", {})
 
-
         ops_report = operations_agent.analyze(gates)
-        
-
         crowd_report = crowd_agent.analyze(gates, history=None)
-        
-
         risk_report = risk_agent.analyze(incidents, weather, metro)
-
 
         synthesizer_prompt = (
             f"Raw Stadium State:\n"

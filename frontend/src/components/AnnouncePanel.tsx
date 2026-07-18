@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useCrowdPilot } from "../context/CrowdPilotContext";
+import { useCrowdPilot } from "../hooks/useCrowdPilot";
 import { translations } from "../utils/translations";
 import { Megaphone, Copy, Check, RotateCcw, Volume2, Play, Pause, QrCode } from "lucide-react";
 import { motion } from "framer-motion";

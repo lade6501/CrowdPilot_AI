@@ -1,305 +1,18 @@
-import React, { useRef, useMemo, useState, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Line, Html } from "@react-three/drei";
-import * as THREE from "three";
-import { useCrowdPilot } from "../context/CrowdPilotContext";
-
-const gateCoords: Record<string, [number, number, number]> = {
-  "Gate A": [0, 0, -4.5],
-  "Gate B": [6.5, 0, 0],
-  "Gate C": [0, 0, 4.5],
-  "Gate D": [-6.5, 0, 0],
-};
-
-const pitchCoords: Record<string, [number, number, number]> = {
-  "Gate A": [0, 0, -2.2],
-  "Gate B": [3.2, 0, 0],
-  "Gate C": [0, 0, 2.2],
-  "Gate D": [-3.2, 0, 0],
-};
-
-const HolographicField: React.FC = () => {
-  return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
-        <planeGeometry args={[9, 6]} />
-        <meshBasicMaterial color="#0b1329" transparent opacity={0.8} side={THREE.DoubleSide} />
-      </mesh>
-      
-      <Line
-        points={[
-          [-4.5, 0, -3],
-          [4.5, 0, -3],
-          [4.5, 0, 3],
-          [-4.5, 0, 3],
-          [-4.5, 0, -3],
-        ]}
-        color="#38bdf8"
-        lineWidth={1}
-        transparent
-        opacity={0.16}
-      />
-      
-      <Line
-        points={[
-          [0, 0, -3],
-          [0, 0, 3],
-        ]}
-        color="#38bdf8"
-        lineWidth={0.8}
-        transparent
-        opacity={0.1}
-      />
-      
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[1.2, 1.23, 32]} />
-        <meshBasicMaterial color="#38bdf8" transparent opacity={0.12} />
-      </mesh>
-    </group>
-  );
-};
-
-const HolographicBowl: React.FC = () => {
-  const t1Ref = useRef<THREE.Mesh>(null);
-  const t2Ref = useRef<THREE.Mesh>(null);
-  const t3Ref = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    if (t1Ref.current) t1Ref.current.rotation.y = t * 0.04;
-    if (t2Ref.current) t2Ref.current.rotation.y = -t * 0.025;
-    if (t3Ref.current) t3Ref.current.rotation.y = t * 0.015;
-  });
-
-  return (
-    <group>
-      <mesh ref={t1Ref} position={[0, 0.25, 0]}>
-        <cylinderGeometry args={[5.2, 4.8, 0.5, 32, 2, true]} />
-        <meshBasicMaterial color="#0891b2" wireframe transparent opacity={0.16} />
-      </mesh>
-      
-      <mesh ref={t2Ref} position={[0, 0.75, 0]}>
-        <cylinderGeometry args={[6.2, 5.8, 0.6, 32, 2, true]} />
-        <meshBasicMaterial color="#0e7490" wireframe transparent opacity={0.11} />
-      </mesh>
-      
-      <mesh ref={t3Ref} position={[0, 1.3, 0]}>
-        <cylinderGeometry args={[7.2, 6.8, 0.8, 32, 2, true]} />
-        <meshBasicMaterial color="#0369a1" wireframe transparent opacity={0.08} />
-      </mesh>
-
-      <mesh position={[0, 0.9, 0]}>
-        <cylinderGeometry args={[7.5, 7.5, 1.8, 32, 1, true]} />
-        <meshBasicMaterial color="#0f172a" transparent opacity={0.35} side={THREE.DoubleSide} />
-      </mesh>
-      <mesh position={[0, 0.9, 0]}>
-        <cylinderGeometry args={[7.51, 7.51, 1.805, 32, 4, true]} />
-        <meshBasicMaterial color="#0284c7" wireframe transparent opacity={0.15} />
-      </mesh>
-
-      <mesh position={[0, 1.8, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[7.45, 7.55, 64]} />
-        <meshBasicMaterial color="#0284c7" transparent opacity={0.4} side={THREE.DoubleSide} />
-      </mesh>
-
-      <Line
-        points={[
-          [-7.5, 0.01, -5.5],
-          [7.5, 0.01, -5.5],
-          [7.5, 0.01, 5.5],
-          [-7.5, 0.01, 5.5],
-          [-7.5, 0.01, -5.5],
-        ]}
-        color="#0284c7"
-        lineWidth={1.5}
-        transparent
-        opacity={0.35}
-      />
-    </group>
-  );
-};
-
-const AIScanningWave: React.FC = () => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const radiusRef = useRef(0.1);
-
-  useFrame(() => {
-    if (!meshRef.current) return;
-    radiusRef.current += 0.06;
-    if (radiusRef.current > 9.2) {
-      radiusRef.current = 0.1;
-    }
-    meshRef.current.scale.setScalar(radiusRef.current);
-    
-    if (meshRef.current.material) {
-      const mat = meshRef.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = Math.max(0, 0.28 * (1 - radiusRef.current / 9.2));
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-      <ringGeometry args={[0.96, 1.0, 32]} />
-      <meshBasicMaterial color="#06b6d4" transparent opacity={0.25} depthWrite={false} side={THREE.DoubleSide} />
-    </mesh>
-  );
-};
-
-interface GateNodeProps {
-  name: string;
-  occupancy: number;
-  selected: boolean;
-  onClick: () => void;
-}
-
-const GateNode: React.FC<GateNodeProps> = ({ name, occupancy, selected, onClick }) => {
-  const coord = gateCoords[name] || [0, 0, 0];
-  const ringRef = useRef<THREE.Mesh>(null);
-  const currentOccupancy = useRef(occupancy);
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    currentOccupancy.current += (occupancy - currentOccupancy.current) * 0.08;
-
-    if (ringRef.current) {
-      if (currentOccupancy.current >= 90) {
-        ringRef.current.scale.setScalar(1 + Math.sin(t * 8) * 0.35);
-      } else if (currentOccupancy.current >= 75) {
-        ringRef.current.scale.setScalar(1 + Math.sin(t * 3.5) * 0.18);
-      } else {
-        ringRef.current.scale.setScalar(1);
-      }
-    }
-  });
-
-  const color = currentOccupancy.current >= 90 ? "#ef4444" : currentOccupancy.current >= 75 ? "#f59e0b" : "#10b981";
-
-  return (
-    <group position={coord}>
-      <mesh position={[0, 0.6, 0]}>
-        <cylinderGeometry args={[0.04, 0.04, 1.2, 8, 1, true]} />
-        <meshBasicMaterial color={color} transparent opacity={0.25} />
-      </mesh>
-
-      <mesh position={[0, 1.2, 0]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
-        <sphereGeometry args={[0.22, 16, 16]} />
-        <meshBasicMaterial color={color} />
-      </mesh>
-
-      <mesh position={[0, 1.2, 0]}>
-        <sphereGeometry args={[0.08, 8, 8]} />
-        <meshBasicMaterial color="#ffffff" />
-      </mesh>
-
-      <mesh ref={ringRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
-        <ringGeometry args={[0.45, 0.55, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.7} side={THREE.DoubleSide} />
-      </mesh>
-
-      {selected && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
-          <ringGeometry args={[0.7, 0.8, 16]} />
-          <meshBasicMaterial color="#f59e0b" transparent opacity={0.8} />
-        </mesh>
-      )}
-
-      {currentOccupancy.current >= 90 && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-          <ringGeometry args={[0.95, 1.0, 16]} />
-          <meshBasicMaterial color="#ef4444" transparent opacity={0.3} />
-        </mesh>
-      )}
-
-      <Html position={[0, 1.7, 0]} center distanceFactor={12}>
-        <div className="bg-slate-950/90 backdrop-blur-md px-2 py-0.5 rounded border border-white/10 select-none shadow-[0_0_10px_rgba(0,0,0,0.8)] text-center pointer-events-none flex flex-col items-center min-w-[56px]">
-          <span className="text-[8px] font-black text-gray-100 uppercase tracking-wider block">
-            {name}
-          </span>
-          <span className={`text-[7.5px] font-bold mt-0.5 block ${
-            occupancy >= 90 ? "text-red-400 font-extrabold animate-pulse" : occupancy >= 75 ? "text-amber-400 font-bold" : "text-emerald-400 font-medium"
-          }`}>
-            {Math.round(occupancy)}%
-          </span>
-        </div>
-      </Html>
-    </group>
-  );
-};
-
-interface ParticleProps {
-  path: [number, number, number][];
-  color: string;
-  speed: number;
-  delay: number;
-  size: number;
-}
-
-const MovingParticle: React.FC<ParticleProps> = ({ path, color, speed, delay, size }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const progress = useRef(0);
-
-  const curve = useMemo(() => {
-    const points = path.map(p => new THREE.Vector3(...p));
-    if (points.length === 2) {
-      return new THREE.LineCurve3(points[0], points[1]);
-    } else {
-      return new THREE.QuadraticBezierCurve3(points[0], points[1], points[2]);
-    }
-  }, [path]);
-
-  useEffect(() => {
-    progress.current = -delay;
-  }, [delay]);
-
-  useFrame(() => {
-    if (!meshRef.current) return;
-    progress.current += speed;
-    if (progress.current >= 1) {
-      progress.current = 0;
-    }
-    if (progress.current >= 0) {
-      const pos = curve.getPointAt(progress.current);
-      meshRef.current.position.copy(pos);
-      meshRef.current.visible = true;
-    } else {
-      meshRef.current.visible = false;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} visible={false}>
-      <sphereGeometry args={[size, 8, 8]} />
-      <meshBasicMaterial color={color} transparent opacity={0.9} />
-    </mesh>
-  );
-};
-
-const Asset3D: React.FC<{ asset: any; dest: [number, number, number] }> = ({ asset, dest }) => {
-  const ref = useRef<THREE.Group>(null);
-  const currentPos = useRef(new THREE.Vector3(0, 0.4, 0));
-
-  useFrame(() => {
-    if (!ref.current) return;
-    const target = new THREE.Vector3(...dest);
-    target.y = 0.35;
-    currentPos.current.lerp(target, 0.08);
-    ref.current.position.copy(currentPos.current);
-  });
-
-  const color = asset.type === "medic" ? "#ef4444" : asset.type === "shuttle" ? "#a855f7" : "#3b82f6";
-  return (
-    <group ref={ref}>
-      <mesh>
-        <boxGeometry args={[0.3, 0.4, 0.3]} />
-        <meshBasicMaterial color={color} transparent opacity={0.85} />
-      </mesh>
-      <mesh position={[0, 0.28, 0]}>
-        <sphereGeometry args={[0.13, 8, 8]} />
-        <meshBasicMaterial color="#ffffff" />
-      </mesh>
-    </group>
-  );
-};
+import React, { useRef, useMemo, useState } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Line } from "@react-three/drei";
+import { useCrowdPilot } from "../hooks/useCrowdPilot";
+import { gateCoords, pitchCoords } from "./Stadium3DConstants";
+import {
+  HolographicField,
+  HolographicBowl,
+  AIScanningWave,
+  GateNode,
+  MovingParticle,
+  Asset3D,
+  RainDrop,
+  CameraRig
+} from "./Stadium3DElements";
 
 interface SceneProps {
   gates: any;
@@ -312,7 +25,10 @@ interface SceneProps {
   selectedGate: string | null;
   setSelectedGate: (g: string | null) => void;
   getDetourTarget: (g: string) => string;
-  getDetourPathPoints: (src: string, target: string) => [number, number, number][];
+  getDetourPathPoints: (
+    src: string,
+    target: string,
+  ) => [number, number, number][];
 }
 
 const MainScene: React.FC<SceneProps> = ({
@@ -328,24 +44,43 @@ const MainScene: React.FC<SceneProps> = ({
   getDetourTarget,
   getDetourPathPoints,
 }) => {
-  const activeIncident = incidents.find(inc => inc.status === "active");
-  const isFire = activeIncident?.title?.toLowerCase().includes("fire") || activeIncident?.title?.toLowerCase().includes("evac");
-  const isStorm = activeIncident?.title?.toLowerCase().includes("storm") || activeIncident?.title?.toLowerCase().includes("rain") || activeIncident?.title?.toLowerCase().includes("lightning");
-  const isEgress = activeIncident?.title?.toLowerCase().includes("whistle") || activeIncident?.title?.toLowerCase().includes("full-time") || activeIncident?.title?.toLowerCase().includes("full time");
+  const activeIncident = incidents.find((inc) => inc.status === "active");
+  const isFire =
+    activeIncident?.title?.toLowerCase().includes("fire") ||
+    activeIncident?.title?.toLowerCase().includes("evac");
+  const isStorm =
+    activeIncident?.title?.toLowerCase().includes("storm") ||
+    activeIncident?.title?.toLowerCase().includes("rain") ||
+    activeIncident?.title?.toLowerCase().includes("lightning");
+  const isEgress =
+    activeIncident?.title?.toLowerCase().includes("whistle") ||
+    activeIncident?.title?.toLowerCase().includes("full-time") ||
+    activeIncident?.title?.toLowerCase().includes("full time");
 
-  const overloadedGates = Object.keys(gates).filter(g => (gates[g]?.occupancy || 0) >= 75);
+  const overloadedGates = Object.keys(gates).filter(
+    (g) => (gates[g]?.occupancy || 0) >= 75,
+  );
 
   const crowdParticles = useMemo(() => {
-    const list: { key: string; path: [number, number, number][]; color: string; speed: number; delay: number }[] = [];
+    const list: {
+      key: string;
+      path: [number, number, number][];
+      color: string;
+      speed: number;
+      delay: number;
+    }[] = [];
     if (!showCrowd) return list;
 
     const gateNames = ["Gate A", "Gate B", "Gate C", "Gate D"];
-    
-    gateNames.forEach(gate => {
+
+    gateNames.forEach((gate) => {
       const occ = gates[gate]?.occupancy || 0;
       const speed = occ >= 75 ? 0.0015 : 0.0035;
-      const count = occ >= 90 ? 24 : occ >= 75 ? 16 : 6;
-      
+      let count = 8;
+      if (occ >= 90) count = 60;
+      else if (occ >= 80) count = 35;
+      else if (occ >= 70) count = 20;
+
       const start = gateCoords[gate];
       const end = pitchCoords[gate];
       const path = isEgress ? [end, start] : [start, end];
@@ -365,7 +100,11 @@ const MainScene: React.FC<SceneProps> = ({
   }, [showCrowd, gates, isEgress]);
 
   const rainParticles = useMemo(() => {
-    const list: { key: string; start: [number, number, number]; speed: number }[] = [];
+    const list: {
+      key: string;
+      start: [number, number, number];
+      speed: number;
+    }[] = [];
     if (!isStorm) return list;
 
     for (let i = 0; i < 45; i++) {
@@ -374,7 +113,7 @@ const MainScene: React.FC<SceneProps> = ({
         start: [
           (Math.random() - 0.5) * 15,
           6 + Math.random() * 2,
-          (Math.random() - 0.5) * 10
+          (Math.random() - 0.5) * 10,
         ],
         speed: 0.15 + Math.random() * 0.1,
       });
@@ -387,19 +126,19 @@ const MainScene: React.FC<SceneProps> = ({
       <HolographicField />
       <HolographicBowl />
       <AIScanningWave />
-      <HolographicDataDust />
 
       {["Gate A", "Gate B", "Gate C", "Gate D"].map((gate) => (
         <GateNode
           key={gate}
           name={gate}
           occupancy={gates[gate]?.occupancy || 0}
+          showPredictions={showPredictions}
           selected={selectedGate === gate}
           onClick={() => setSelectedGate(gate)}
         />
       ))}
 
-      {crowdParticles.map(p => (
+      {crowdParticles.map((p) => (
         <MovingParticle
           key={p.key}
           path={p.path}
@@ -410,59 +149,105 @@ const MainScene: React.FC<SceneProps> = ({
         />
       ))}
 
-      {showAIPaths && overloadedGates.map((srcGate) => {
-        const targetGate = getDetourTarget(srcGate);
-        if (!targetGate) return null;
-        const pts = getDetourPathPoints(srcGate, targetGate);
-        return (
-          <group key={`detour3d-${srcGate}`}>
-            <Line
-              points={pts}
-              color="#10b981"
-              lineWidth={2}
-              transparent
-              opacity={0.5}
-            />
-            <MovingParticle path={pts} color="#10b981" speed={0.008} delay={0} size={0.12} />
-            <MovingParticle path={pts} color="#10b981" speed={0.008} delay={0.25} size={0.12} />
-            <MovingParticle path={pts} color="#10b981" speed={0.008} delay={0.5} size={0.12} />
-            <MovingParticle path={pts} color="#10b981" speed={0.008} delay={0.75} size={0.12} />
-          </group>
-        );
-      })}
+      {showAIPaths &&
+        overloadedGates.map((srcGate) => {
+          const targetGate = getDetourTarget(srcGate);
+          if (!targetGate) return null;
+          const pts = getDetourPathPoints(srcGate, targetGate);
+          return (
+            <group key={`detour3d-${srcGate}`}>
+              <Line
+                points={pts}
+                color="#10b981"
+                lineWidth={2}
+                transparent
+                opacity={0.5}
+              />
+              <MovingParticle
+                path={pts}
+                color="#10b981"
+                speed={0.015}
+                delay={0}
+                size={0.12}
+              />
+              <MovingParticle
+                path={pts}
+                color="#10b981"
+                speed={0.015}
+                delay={0.25}
+                size={0.12}
+              />
+              <MovingParticle
+                path={pts}
+                color="#10b981"
+                speed={0.015}
+                delay={0.5}
+                size={0.12}
+              />
+              <MovingParticle
+                path={pts}
+                color="#10b981"
+                speed={0.015}
+                delay={0.75}
+                size={0.12}
+              />
+            </group>
+          );
+        })}
 
-      {showPredictions && overloadedGates.map((srcGate) => {
-        const targetGate = getDetourTarget(srcGate);
-        if (!targetGate) return null;
-        const pts = getDetourPathPoints(srcGate, targetGate);
-        return (
-          <group key={`pred3d-${srcGate}`}>
-            <Line
-              points={pts}
-              color="#f59e0b"
-              lineWidth={1}
-              dashed
-              dashScale={2}
-              transparent
-              opacity={0.4}
-            />
-            <MovingParticle
-              path={pts}
-              color="#f59e0b"
-              speed={0.003}
-              delay={0}
-              size={0.11}
-            />
-          </group>
-        );
-      })}
+      {showPredictions &&
+        overloadedGates.map((srcGate) => {
+          const targetGate = getDetourTarget(srcGate);
+          if (!targetGate) return null;
+          const pts = getDetourPathPoints(srcGate, targetGate);
+          return (
+            <group key={`pred3d-${srcGate}`}>
+              <Line
+                points={pts}
+                color="#f59e0b"
+                lineWidth={1}
+                dashed
+                dashScale={2}
+                transparent
+                opacity={0.4}
+              />
+              <MovingParticle
+                path={pts}
+                color="#f59e0b"
+                speed={0.012}
+                delay={0}
+                size={0.11}
+              />
+              <MovingParticle
+                path={pts}
+                color="#f59e0b"
+                speed={0.012}
+                delay={0.25}
+                size={0.11}
+              />
+              <MovingParticle
+                path={pts}
+                color="#f59e0b"
+                speed={0.012}
+                delay={0.5}
+                size={0.11}
+              />
+              <MovingParticle
+                path={pts}
+                color="#f59e0b"
+                speed={0.012}
+                delay={0.75}
+                size={0.11}
+              />
+            </group>
+          );
+        })}
 
-      {showResources && assets.map((asset) => {
-        const destCoord = gateCoords[asset.gate] || [0, 0, 0];
-        return (
-          <Asset3D key={asset.id} asset={asset} dest={destCoord} />
-        );
-      })}
+      {showResources &&
+        assets.map((asset) => {
+          const destCoord = gateCoords[asset.gate] || [0, 0, 0];
+          return <Asset3D key={asset.id} asset={asset} dest={destCoord} />;
+        })}
 
       {isFire && (
         <group position={[3.5, 0.1, -1.8]}>
@@ -477,123 +262,17 @@ const MainScene: React.FC<SceneProps> = ({
         </group>
       )}
 
-      {isStorm && rainParticles.map((r) => (
-        <RainDrop key={r.key} start={r.start} speed={r.speed} />
-      ))}
+      {isStorm &&
+        rainParticles.map((r) => (
+          <RainDrop key={r.key} start={r.start} speed={r.speed} />
+        ))}
     </group>
   );
 };
 
-const RainDrop: React.FC<{ start: [number, number, number]; speed: number }> = ({ start, speed }) => {
-  const ref = useRef<THREE.Mesh>(null);
-  
-  useFrame(() => {
-    if (!ref.current) return;
-    ref.current.position.y -= speed;
-    if (ref.current.position.y <= 0) {
-      ref.current.position.y = start[1];
-    }
-  });
-
-  return (
-    <mesh ref={ref} position={start}>
-      <boxGeometry args={[0.04, 0.3, 0.04]} />
-      <meshBasicMaterial color="#60a5fa" transparent opacity={0.5} />
-    </mesh>
-  );
-};
-const HolographicDataDust: React.FC = () => {
-  const count = 60;
-  const pointsRef = useRef<THREE.Points>(null);
-
-  const [positions, speeds] = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const sp = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 6.5;
-      pos[i * 3] = Math.cos(angle) * radius;
-      pos[i * 3 + 1] = Math.random() * 3.5;
-      pos[i * 3 + 2] = Math.sin(angle) * radius;
-      sp[i] = 0.005 + Math.random() * 0.012;
-    }
-    return [pos, sp];
-  }, []);
-
-  useFrame(() => {
-    if (!pointsRef.current) return;
-    const geo = pointsRef.current.geometry;
-    const attr = geo.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < count; i++) {
-      let y = attr.getY(i);
-      y += speeds[i];
-      if (y > 3.5) {
-        y = 0.01;
-        const angle = Math.random() * Math.PI * 2;
-        const radius = Math.random() * 6.5;
-        attr.setX(i, Math.cos(angle) * radius);
-        attr.setZ(i, Math.sin(angle) * radius);
-      }
-      attr.setY(i, y);
-    }
-    attr.needsUpdate = true;
-  });
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        color="#38bdf8"
-        size={0.075}
-        transparent
-        opacity={0.32}
-        sizeAttenuation
-        depthWrite={false}
-      />
-    </points>
-  );
-};
-
-const CameraRig: React.FC<{ activePreset: string; controlsRef: React.RefObject<any> }> = ({ activePreset, controlsRef }) => {
-  useFrame((state) => {
-    const targetPos = new THREE.Vector3(9, 8, 9);
-    const targetLookAt = new THREE.Vector3(0, 0, 0);
-
-    if (activePreset === "Gate A") {
-      targetPos.set(0, 5, -8.2);
-      targetLookAt.set(0, 0, -4.5);
-    } else if (activePreset === "Gate B") {
-      targetPos.set(10.2, 5, 0);
-      targetLookAt.set(6.5, 0, 0);
-    } else if (activePreset === "Gate C") {
-      targetPos.set(0, 5, 8.2);
-      targetLookAt.set(0, 0, 4.5);
-    } else if (activePreset === "Gate D") {
-      targetPos.set(-10.2, 5, 0);
-      targetLookAt.set(-6.5, 0, 0);
-    } else {
-      targetPos.set(9, 8, 9);
-      targetLookAt.set(0, 0, 0);
-    }
-
-    state.camera.position.lerp(targetPos, 0.05);
-
-    if (controlsRef.current) {
-      controlsRef.current.target.lerp(targetLookAt, 0.05);
-      controlsRef.current.update();
-    }
-  });
-  return null;
-};
-
 export const StadiumMap3D: React.FC = () => {
   const { stadiumState, selectedGate, setSelectedGate } = useCrowdPilot();
-  
+
   const [showCrowd, setShowCrowd] = useState(true);
   const [showAIPaths, setShowAIPaths] = useState(true);
   const [showResources, setShowResources] = useState(true);
@@ -608,12 +287,14 @@ export const StadiumMap3D: React.FC = () => {
   const assets = (stadiumState as any).assets || [];
 
   const getDetourTarget = (srcGate: string) => {
-    const gateOptions = ["Gate A", "Gate B", "Gate C", "Gate D"].filter(g => g !== srcGate);
+    const gateOptions = ["Gate A", "Gate B", "Gate C", "Gate D"].filter(
+      (g) => g !== srcGate,
+    );
     const neighbors: Record<string, string[]> = {
       "Gate A": ["Gate B", "Gate D", "Gate C"],
       "Gate B": ["Gate A", "Gate C", "Gate D"],
       "Gate C": ["Gate B", "Gate D", "Gate A"],
-      "Gate D": ["Gate A", "Gate C", "Gate B"]
+      "Gate D": ["Gate A", "Gate C", "Gate B"],
     };
     const srcNeighbors = neighbors[srcGate] || [];
     const sorted = [...gateOptions].sort((g1, g2) => {
@@ -634,7 +315,10 @@ export const StadiumMap3D: React.FC = () => {
     return sorted[0];
   };
 
-  const getDetourPathPoints = (src: string, target: string): [number, number, number][] => {
+  const getDetourPathPoints = (
+    src: string,
+    target: string,
+  ): [number, number, number][] => {
     const p1 = gateCoords[src];
     const p2 = gateCoords[target];
     if (!p1 || !p2) return [];
@@ -644,34 +328,57 @@ export const StadiumMap3D: React.FC = () => {
     let qz = (p1[2] + p2[2]) / 2;
 
     if (src === "Gate B" && target === "Gate D") {
-      qx = 0; qz = -2.5;
+      qx = 0;
+      qz = -2.5;
     } else if (src === "Gate D" && target === "Gate B") {
-      qx = 0; qz = 2.5;
+      qx = 0;
+      qz = 2.5;
     } else if (src === "Gate A" && target === "Gate C") {
-      qx = 2.2; qz = 0;
+      qx = 2.2;
+      qz = 0;
     } else if (src === "Gate C" && target === "Gate A") {
-      qx = -2.2; qz = 0;
+      qx = -2.2;
+      qz = 0;
     } else {
-      if ((src === "Gate A" && target === "Gate B") || (src === "Gate B" && target === "Gate A")) {
-        qx = 4.2; qz = -2.2;
-      } else if ((src === "Gate B" && target === "Gate C") || (src === "Gate C" && target === "Gate B")) {
-        qx = 4.2; qz = 2.2;
-      } else if ((src === "Gate C" && target === "Gate D") || (src === "Gate D" && target === "Gate C")) {
-        qx = -4.2; qz = 2.2;
-      } else if ((src === "Gate D" && target === "Gate A") || (src === "Gate A" && target === "Gate D")) {
-        qx = -4.2; qz = -2.2;
+      if (
+        (src === "Gate A" && target === "Gate B") ||
+        (src === "Gate B" && target === "Gate A")
+      ) {
+        qx = 4.2;
+        qz = -2.2;
+      } else if (
+        (src === "Gate B" && target === "Gate C") ||
+        (src === "Gate C" && target === "Gate B")
+      ) {
+        qx = 4.2;
+        qz = 2.2;
+      } else if (
+        (src === "Gate C" && target === "Gate D") ||
+        (src === "Gate D" && target === "Gate C")
+      ) {
+        qx = -4.2;
+        qz = 2.2;
+      } else if (
+        (src === "Gate D" && target === "Gate A") ||
+        (src === "Gate A" && target === "Gate D")
+      ) {
+        qx = -4.2;
+        qz = -2.2;
       }
     }
+
     return [p1, [qx, qy, qz], p2];
   };
 
   return (
-    <div className="w-full relative h-[420px] bg-slate-950 rounded-2xl overflow-hidden border border-white/5 shadow-2xl flex flex-col justify-between">
-      <div className="absolute top-4 left-4 z-10 flex gap-1.5 flex-wrap">
+    <div className="relative w-full h-[520px] bg-slate-950/40 rounded-2xl border border-white/5 overflow-hidden flex flex-col">
+      <div className="absolute top-4 left-4 z-10 flex gap-1 bg-slate-950/80 p-1 rounded-lg border border-white/5 shadow-md">
         <button
           onClick={() => setShowCrowd(!showCrowd)}
           className={`px-2 py-1 rounded text-[10px] font-bold border transition-colors ${
-            showCrowd ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/35" : "bg-slate-900/60 text-gray-500 border-white/5"
+            showCrowd
+              ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/35"
+              : "bg-slate-900/60 text-gray-500 border-white/5"
           }`}
         >
           ● Crowd
@@ -679,7 +386,9 @@ export const StadiumMap3D: React.FC = () => {
         <button
           onClick={() => setShowAIPaths(!showAIPaths)}
           className={`px-2 py-1 rounded text-[10px] font-bold border transition-colors ${
-            showAIPaths ? "bg-fifa-gold/20 text-fifa-gold border-fifa-gold/35" : "bg-slate-900/60 text-gray-500 border-white/5"
+            showAIPaths
+              ? "bg-fifa-gold/20 text-fifa-gold border-fifa-gold/35"
+              : "bg-slate-900/60 text-gray-500 border-white/5"
           }`}
         >
           ➔ AI Detour
@@ -687,7 +396,9 @@ export const StadiumMap3D: React.FC = () => {
         <button
           onClick={() => setShowResources(!showResources)}
           className={`px-2 py-1 rounded text-[10px] font-bold border transition-colors ${
-            showResources ? "bg-blue-500/20 text-blue-450 border-blue-500/35" : "bg-slate-900/60 text-gray-500 border-white/5"
+            showResources
+              ? "bg-blue-500/20 text-blue-450 border-blue-500/35"
+              : "bg-slate-900/60 text-gray-500 border-white/5"
           }`}
         >
           ★ Staff
@@ -695,28 +406,56 @@ export const StadiumMap3D: React.FC = () => {
         <button
           onClick={() => setShowPredictions(!showPredictions)}
           className={`px-2 py-1 rounded text-[10px] font-bold border transition-colors ${
-            showPredictions ? "bg-purple-500/20 text-purple-400 border-purple-500/35" : "bg-slate-900/60 text-gray-500 border-white/5"
+            showPredictions
+              ? "bg-purple-500/20 text-purple-400 border-purple-500/35"
+              : "bg-slate-900/60 text-gray-500 border-white/5"
           }`}
         >
           ✦ Predict
         </button>
       </div>
 
-      <div className="absolute top-4 right-4 z-10 bg-slate-950/80 px-2.5 py-1.5 rounded border border-white/5 select-none text-right">
-        <span className="text-[9px] font-bold text-fifa-gold uppercase tracking-wider block">
-          Presentation Mode
-        </span>
-        <span className="text-[8px] text-gray-400 font-medium block">
-          Isometric AI Digital Twin
-        </span>
+      <div className="absolute top-4 right-4 z-10 bg-slate-950/90 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10 select-none text-left space-y-1.5 shadow-xl max-w-48">
+        <div className="flex items-center justify-between border-b border-white/5 pb-1 gap-4">
+          <span className="text-[9px] font-black text-fifa-gold uppercase tracking-wider">
+            AI STATUS
+          </span>
+          <span className="flex items-center gap-1 text-[8.5px] text-emerald-455 font-bold">
+            <span className="w-1 h-1 rounded-full bg-emerald-400 animate-ping"></span>
+            Monitoring
+          </span>
+        </div>
+        <div className="space-y-1 text-[8.5px] text-gray-300 font-medium">
+          <div className="flex items-center gap-1.5">
+            <span>📊</span>
+            <span>147 Telemetry Events/min</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span>🤖</span>
+            <span>6 Agents Active</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span>🎯</span>
+            <span>Confidence 94%</span>
+          </div>
+        </div>
       </div>
 
       <div className="absolute bottom-4 left-4 z-10 flex gap-1 items-center bg-slate-950/85 backdrop-blur-md border border-white/5 p-1 rounded-xl shadow-lg">
-        <span className="text-[7.5px] text-gray-500 uppercase tracking-widest font-black px-1.5 select-none">Presets:</span>
+        <span className="text-[7.5px] text-gray-500 uppercase tracking-widest font-black px-1.5 select-none">
+          Presets:
+        </span>
         {["Overview", "Gate A", "Gate B", "Gate C", "Gate D"].map((preset) => (
           <button
             key={preset}
-            onClick={() => setCameraPreset(preset)}
+            onClick={() => {
+              setCameraPreset(preset);
+              if (preset === "Overview") {
+                setSelectedGate(null);
+              } else {
+                setSelectedGate(preset);
+              }
+            }}
             className={`px-2 py-0.5 rounded text-[8px] font-bold border transition-all cursor-pointer ${
               cameraPreset === preset
                 ? "bg-fifa-gold/20 text-fifa-gold border-fifa-gold/30 shadow"
@@ -735,7 +474,7 @@ export const StadiumMap3D: React.FC = () => {
         >
           <ambientLight intensity={0.55} />
           <pointLight position={[10, 10, 10]} intensity={1.2} />
-          
+
           <MainScene
             gates={gates}
             incidents={incidents}
@@ -751,15 +490,13 @@ export const StadiumMap3D: React.FC = () => {
           />
 
           <CameraRig activePreset={cameraPreset} controlsRef={controlsRef} />
-          
+
           <OrbitControls
             ref={controlsRef}
             enableZoom={false}
             enablePan={false}
             maxPolarAngle={Math.PI / 2.8}
             minPolarAngle={Math.PI / 4.2}
-            maxAzimuthAngle={Math.PI / 3.5}
-            minAzimuthAngle={-Math.PI / 3.5}
           />
         </Canvas>
       </div>

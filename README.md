@@ -36,6 +36,17 @@
 
 ---
 
+## 🎯 FIFA Brief Alignment & Objectives
+
+CrowdPilot AI is engineered to address the core tournament operational parameters requested in the FIFA brief:
+
+* ⚡ **Real-Time Decision Support:** Aggregates real-time gate telemetry, shuttle frequencies, and weather forecasts into a single command view. Specialized LLM agents analyze anomalies and propose actionable routing updates immediately.
+* 🗺️ **Wayfinding & Navigation Assistance:** Animates en-route spectator particles along optimal pathways. Operates camera panning presets to lock onto bottleneck gates (Gate A-D), guiding staff dispatch accurately.
+* ♿ **Inclusive Accessibility Support:** Automatically limits flow velocity at overcrowded gates to protect vulnerable fans, triggering auxiliary steward deployment to guide attendees near accessible seating zones.
+* 🗣️ **Multilingual PA & Crew Dispatch:** Automatically drafts and broadcasts PA announcements translated into Spanish, French, and Hindi, ensuring clear emergency communication to international tournament visitors.
+
+---
+
 ## 🏗️ Architecture
 
 ```text

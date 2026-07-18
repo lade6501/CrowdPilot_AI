@@ -351,13 +351,11 @@ async def trigger_ai_orchestration():
         logger.error(f"Error compiling AI orchestrations: {e}")
         err_str = str(e)
         
-
         from backend.agents.orchestrator import get_mock_fallback_summary
         summary = get_mock_fallback_summary(stadium_state)
         stadium_state["ai_summary"] = summary.model_dump()
         
         if "429" in err_str or "quota" in err_str.lower() or "limit" in err_str.lower():
-
             stadium_state["quota_limited"] = True
             stadium_state["quota_countdown"] = 30
             stadium_state["ai_error"] = None
@@ -371,18 +369,15 @@ async def load_replay_preset(preset_name: str):
     global is_locked_to_replay, stadium_state, live_state_backup
     if preset_name in REPLAY_PRESETS:
         if not is_locked_to_replay:
-
             live_state_backup = json.loads(json.dumps(stadium_state))
             live_state_backup["tick"] = sim_tick
 
         is_locked_to_replay = True
         preset_data = REPLAY_PRESETS[preset_name]
         
-
         from backend.agents.agentic_core import agentic_manager
         agentic_manager.reset_queue()
         
-
         stadium_state["mode"] = "replay"
         stadium_state["timestamp"] = preset_data["timestamp"]
         stadium_state["match"] = preset_data["match"]
@@ -392,16 +387,13 @@ async def load_replay_preset(preset_name: str):
         stadium_state["incidents"] = json.loads(json.dumps(preset_data["incidents"]))
         stadium_state["metro"] = json.loads(json.dumps(preset_data["metro"]))
         
-
         await trigger_ai_orchestration()
         
-
         stadium_state["actions_queue"] = agentic_manager.get_actions()
         stadium_state["autonomy_level"] = agentic_manager.autonomy_level
         stadium_state["calibration_diff"] = agentic_manager.calibration_diff
         stadium_state["auto_draft_announcement"] = agentic_manager.auto_draft_announcement
         
-
         await manager.broadcast({
             "type": "state_sync",
             "tick": preset_data["tick"],
@@ -413,7 +405,6 @@ async def reset_simulator_to_live():
     is_locked_to_replay = False
     
     if live_state_backup:
-
         stadium_state["mode"] = "live"
         stadium_state["timestamp"] = live_state_backup["timestamp"]
         stadium_state["match"] = live_state_backup["match"]
@@ -431,11 +422,9 @@ async def reset_simulator_to_live():
         
     logger.info("Simulator returned to Live Feed mode.")
     
-
     from backend.agents.agentic_core import agentic_manager
     agentic_manager.reset_queue()
     
-
     stadium_state["actions_queue"] = agentic_manager.get_actions()
     stadium_state["autonomy_level"] = agentic_manager.autonomy_level
     stadium_state["calibration_diff"] = agentic_manager.calibration_diff

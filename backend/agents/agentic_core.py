@@ -89,7 +89,6 @@ class AgenticManager:
             self.autonomy_level = level
             logger.info(f"Autonomy level updated to: {level}")
             
-
             for action in self.actions_queue:
                 if action["status"] == "pending" and action["governance_check"] == "passed":
                     risk = action["risk_level"]
@@ -137,12 +136,10 @@ class AgenticManager:
         }
         self.actions_queue.append(new_action)
         
-
         asyncio.create_task(self.run_governance_review(action_id, action_data))
         return action_id
 
     async def run_governance_review(self, action_id: str, action_data: Dict[str, Any]):
-
         await asyncio.sleep(1.5)
         
         action = next((a for a in self.actions_queue if a["id"] == action_id), None)
@@ -346,7 +343,6 @@ class AgenticManager:
         self.actions_queue = new_queue
 
     def perceive_telemetry(self, stadium_state: Dict[str, Any], current_tick: int):
-
         for gate_name, gate_data in stadium_state["gates"].items():
             gate_load = gate_data["occupancy"]
             if gate_load >= 90:
@@ -493,13 +489,11 @@ class AgenticManager:
                             "action": f"Pre-position auxiliary ticketing stewards at {gate_name} to handle the incoming parking lot wave.",
                             "risk_level": "Low",
                             "target_metric": f"gates.{gate_name}.parking_surge",
-                            "initial_value": stadium_state["gates"][gate_name]["occupancy"]
                         })
 
     def trigger_scripted_disagreement(self):
         logger.info("Triggering scripted Multi-Agent Disagreement Demo...")
         
-
         cf_id = self.add_action_to_queue({
             "proposer": "Crowd Flow Agent",
             "why": "Active fire alarm in South Concourse level 2. Immediate evacuation required.",
@@ -509,7 +503,6 @@ class AgenticManager:
             "initial_value": 98
         })
         
-
         log_id = self.add_action_to_queue({
             "proposer": "Logistics Agent",
             "why": "Gate C is at 78% occupancy. Metro Line 2 is experiencing delays and cannot absorb redirected evacuees.",
@@ -519,11 +512,9 @@ class AgenticManager:
             "initial_value": 98
         })
         
-
         asyncio.create_task(self.resolve_disagreement(cf_id, log_id))
 
     async def resolve_disagreement(self, cf_id: str, log_id: str):
-
         await asyncio.sleep(1.6)
         
         cf_action = next((a for a in self.actions_queue if a["id"] == cf_id), None)
@@ -538,7 +529,6 @@ class AgenticManager:
             log_action["governance_check"] = "failed"
             log_action["governance_details"] = "Resolved by Governance: Conflict resolved via unified merged resolution."
             
-
             self.add_action_to_queue({
                 "proposer": "Governance Agent (Conflict Resolution)",
                 "why": "Resolved conflict: Redirecting Gate B spectators to Gate C will block exits and strain metro resources.",
@@ -548,7 +538,6 @@ class AgenticManager:
                 "initial_value": 98
             })
             
-
             self.auto_draft_announcement = {
                 "situation": "Fire alarm triggered. Please do not use Gate B. Orderly evacuation redirected to Gate D. Shuttles boarding at Lot D.",
                 "audience": "General Public",

@@ -1,7 +1,13 @@
 import React from "react";
-import { useCrowdPilot } from "../context/CrowdPilotContext";
+import { useCrowdPilot } from "../hooks/useCrowdPilot";
 import { translations } from "../utils/translations";
-import { AlertCircle, ShieldAlert, CloudRain, Clock, Train } from "lucide-react";
+import {
+  AlertCircle,
+  ShieldAlert,
+  CloudRain,
+  Clock,
+  Train,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const LiveTimeline: React.FC = () => {
@@ -12,7 +18,6 @@ export const LiveTimeline: React.FC = () => {
   const { incidents } = stadiumState;
   const t = translations[appLanguage] || translations.en;
 
-  
   const getIncidentIcon = (type: string) => {
     switch (type) {
       case "medical":
@@ -30,7 +35,6 @@ export const LiveTimeline: React.FC = () => {
     }
   };
 
- 
   const getPriorityBadgeClass = (priority: string) => {
     switch (priority) {
       case "Critical":
@@ -44,10 +48,10 @@ export const LiveTimeline: React.FC = () => {
     }
   };
 
-  
-  const sortedIncidents = [...incidents].sort((a, b) => b.id.localeCompare(a.id));
+  const sortedIncidents = [...incidents].sort((a, b) =>
+    b.id.localeCompare(a.id),
+  );
 
-  
   const getMissionChain = (inc: any) => {
     if (inc.type === "medical") {
       switch (appLanguage) {
@@ -57,7 +61,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Altos niveles de calor y humedad dentro del tazón de asientos.`,
             decision: `Despachar al Equipo Médico 3 con camilla y equipo de ventilación.`,
             announcement: `Advertencia PA estándar local emitida para despejar pasillos del concourse.`,
-            monitoring: `Los paramédicos llegaron. Espectador estabilizado. Monitoreando ruta de salida.`
+            monitoring: `Los paramédicos llegaron. Espectador estabilizado. Monitoreando ruta de salida.`,
           };
         case "fr":
           return {
@@ -65,7 +69,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Niveaux de chaleur et d'humidité élevés à l'intérieur du stade.`,
             decision: `Dépêcher l'équipe médicale 3 avec civière et équipement de ventilation.`,
             announcement: `Avertissement standard PA local émis pour dégager les couloirs du concourse.`,
-            monitoring: `Les ambulanciers sont arrivés. Spectateur stabilisé. Surveillance de l'itinéraire de sortie.`
+            monitoring: `Les ambulanciers sont arrivés. Spectateur stabilisé. Surveillance de l'itinéraire de sortie.`,
           };
         case "hi":
           return {
@@ -73,7 +77,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `स्टेडियम के अंदर उच्च तापमान और आर्द्रता का स्तर।`,
             decision: `स्ट्रेचर और वेंटिलेशन उपकरण के साथ मेडिकल टीम 3 को रवाना करें।`,
             announcement: `कंसोर्स गलियारों को साफ करने के लिए सामान्य स्थानीय पीए चेतावनी जारी।`,
-            monitoring: `चिकित्सक पहुंचे। दर्शक की हालत स्थिर। बाहर निकलने के रास्ते की निगरानी।`
+            monitoring: `चिकित्सक पहुंचे। दर्शक की हालत स्थिर। बाहर निकलने के रास्ते की निगरानी।`,
           };
         default:
           return {
@@ -81,7 +85,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `High heat levels and humidity inside seating bowl.`,
             decision: `Dispatch Medics Team 3 with stretcher and ventilation equipment.`,
             announcement: `Standard local PA warning issued to clear concourse corridors.`,
-            monitoring: `Paramedics arrived. Spectator stabilized. Monitoring exit routing.`
+            monitoring: `Paramedics arrived. Spectator stabilized. Monitoring exit routing.`,
           };
       }
     }
@@ -94,7 +98,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Falla del nodo de señalización en la intersección de University.`,
             decision: `Activar protocolo de autobuses de enlace. Desplegar 8 autobuses al Lote D.`,
             announcement: `Anuncio PA generado para guiar a los viajeros del tren a los andenes de enlace.`,
-            monitoring: `Autobuses abordando. Retraso mitigado a menos de 8 minutos.`
+            monitoring: `Autobuses abordando. Retraso mitigado a menos de 8 minutos.`,
           };
         case "fr":
           return {
@@ -102,7 +106,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Panne du nœud de signalisation à la jonction University.`,
             decision: `Activer le protocole de navettes. Déployer 8 navettes au parking D.`,
             announcement: `Annonce PA générée pour guider les usagers du train vers les quais de navette.`,
-            monitoring: `Navettes en cours d'embarquement. Retard atténué à moins de 8 minutes.`
+            monitoring: `Navettes en cours d'embarquement. Retard atténué à moins de 8 minutes.`,
           };
         case "hi":
           return {
@@ -110,7 +114,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `यूनिवर्सिटी जंक्शन पर सिग्नलिंग नोड की विफलता।`,
             decision: `शटल बस प्रोटोकॉल सक्रिय करें। पार्किंग लॉट डी में 8 शटल बसें तैनात करें।`,
             announcement: `ट्रेन यात्रियों को शटल बे पर निर्देशित करने के लिए पीए घोषणा जारी।`,
-            monitoring: `शटल में सवार हो रहे हैं। देरी को 8 मिनट से कम कर दिया गया है।`
+            monitoring: `शटल में सवार हो रहे हैं। देरी को 8 मिनट से कम कर दिया गया है।`,
           };
         default:
           return {
@@ -118,7 +122,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Signaling node failure at University junction.`,
             decision: `Trigger shuttle bus protocol. Deploy 8 shuttle buses to Parking Lot D.`,
             announcement: `PA announcement generated to guide train commuters to shuttle bays.`,
-            monitoring: `Shuttles boarding. Peak delay mitigated to under 8 mins. Monitoring line power.`
+            monitoring: `Shuttles boarding. Peak delay mitigated to under 8 mins. Monitoring line power.`,
           };
       }
     }
@@ -131,7 +135,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Sistema de tormenta de convección moviéndose hacia el este.`,
             decision: `Cerrar puertas de salida. Pedir a los espectadores que se refugien dentro.`,
             announcement: `Anuncio de emergencia de megafonía emitido en 5 idiomas aconsejando refugio inmediato.`,
-            monitoring: `Salidas cerradas. Pasillos al 80% de carga de refugio.`
+            monitoring: `Salidas cerradas. Pasillos al 80% de carga de refugio.`,
           };
         case "fr":
           return {
@@ -139,7 +143,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Système tempétueux de convection se déplaçant vers l'est.`,
             decision: `Fermer les portes de sortie. Demander aux spectateurs de s'abriter à l'intérieur.`,
             announcement: `Annonce d'urgence PA diffusée en 5 langues conseillant un abri immédiat.`,
-            monitoring: `Sorties scellées. Couloirs à 80% de charge d'abri.`
+            monitoring: `Sorties scellées. Couloirs à 80% de charge d'abri.`,
           };
         case "hi":
           return {
@@ -147,7 +151,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `संवहनी तूफान प्रणाली पूर्व की ओर बढ़ रही है।`,
             decision: `निकास द्वार बंद करें। दर्शकों से ढके हुए गलियारों में शरण लेने का अनुरोध करें।`,
             announcement: `तुरंत शरण लेने की सलाह देते हुए 5 भाषाओं में आपातकालीन पीए प्रसारण जारी।`,
-            monitoring: `निकास मार्ग बंद। गलियारे 80% आश्रय भार पर।`
+            monitoring: `निकास मार्ग बंद। गलियारे 80% आश्रय भार पर।`,
           };
         default:
           return {
@@ -155,7 +159,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Convective weather system moving East.`,
             decision: `Lock concourse exit gates. Request spectators shelter inside covered corridors.`,
             announcement: `Emergency PA warning broadcasted in 5 languages advising immediate shelter.`,
-            monitoring: `Evacuation paths sealed. Corridors at 80% shelter load. Monitoring storm radar.`
+            monitoring: `Evacuation paths sealed. Corridors at 80% shelter load. Monitoring storm radar.`,
           };
       }
     }
@@ -168,7 +172,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Protocolo de seguridad activo en el sector este.`,
             decision: `Cerrar temporalmente los accesos del corredor este.`,
             announcement: `Instrucciones locales de megafonía para guiar a los flujos hacia las plazas oeste.`,
-            monitoring: `Flujos desviados. Zona de seguridad establecida con éxito.`
+            monitoring: `Flujos desviados. Zona de seguridad establecida con éxito.`,
           };
         case "fr":
           return {
@@ -176,7 +180,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Protocole de sécurité actif dans le secteur est.`,
             decision: `Fermer temporairement les accès du couloir est.`,
             announcement: `Instructions de sonorisation locales pour guider les flux vers les esplanades ouest.`,
-            monitoring: `Flux déviés. Périmètre de sécurité établi avec succès.`
+            monitoring: `Flux déviés. Périmètre de sécurité établi avec succès.`,
           };
         case "hi":
           return {
@@ -184,7 +188,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `पूर्वी क्षेत्र में सुरक्षा प्रोटोकॉल सक्रिय।`,
             decision: `पूर्वी गलियारे के मार्गों को अस्थायी रूप से बंद करें।`,
             announcement: `भीड़ को पश्चिमी प्लाजा की ओर निर्देशित करने के लिए स्थानीय पीए घोषणा जारी।`,
-            monitoring: `भीड़ प्रवाह सफलतापूर्वक पुनर्निर्देशित। सुरक्षा घेरा मजबूत।`
+            monitoring: `भीड़ प्रवाह सफलतापूर्वक पुनर्निर्देशित। सुरक्षा घेरा मजबूत।`,
           };
         default:
           return {
@@ -192,7 +196,7 @@ export const LiveTimeline: React.FC = () => {
             reason: `Security protocol active in designated stadium sector.`,
             decision: `Seal specific corridors and lock flow rate throughputs.`,
             announcement: `Local radio instructions broadcasted to security teams.`,
-            monitoring: `Zones sealed. Flow redirections monitoring successfully.`
+            monitoring: `Zones sealed. Flow redirections monitoring successfully.`,
           };
       }
     }
@@ -226,10 +230,26 @@ export const LiveTimeline: React.FC = () => {
         const capMatch = text.match(/(\d+)%/);
         const cap = capMatch ? capMatch[1] : "80";
         const lotMap: Record<string, Record<string, string>> = {
-          "Parking Lot A": { es: "Estacionamiento A", fr: "Parking A", hi: "पार्किंग स्थल A" },
-          "Parking Lot B": { es: "Estacionamiento B", fr: "Parking B", hi: "पार्किंग स्थल B" },
-          "Parking Lot C": { es: "Estacionamiento C", fr: "Parking C", hi: "पार्किंग स्थल C" },
-          "Parking Lot D": { es: "Estacionamiento D", fr: "Parking D", hi: "पार्किंग स्थल D" },
+          "Parking Lot A": {
+            es: "Estacionamiento A",
+            fr: "Parking A",
+            hi: "पार्किंग स्थल A",
+          },
+          "Parking Lot B": {
+            es: "Estacionamiento B",
+            fr: "Parking B",
+            hi: "पार्किंग स्थल B",
+          },
+          "Parking Lot C": {
+            es: "Estacionamiento C",
+            fr: "Parking C",
+            hi: "पार्किंग स्थल C",
+          },
+          "Parking Lot D": {
+            es: "Estacionamiento D",
+            fr: "Parking D",
+            hi: "पार्किंग स्थल D",
+          },
         };
         const lTrans = lotMap[lot]?.[lang] || lot;
         if (lang === "es") {
@@ -252,7 +272,7 @@ export const LiveTimeline: React.FC = () => {
           reason: `Actualización de telemetría de operaciones estándar del estadio.`,
           decision: `Oficiales de seguridad desplegados para asegurar las líneas del sector.`,
           announcement: `No se requiere megafonía general. Comunicaciones activas del equipo local.`,
-          monitoring: `Flujo de sensor estable. Continuando vigilancia normal.`
+          monitoring: `Flujo de sensor estable. Continuando vigilancia normal.`,
         };
       case "fr":
         return {
@@ -260,7 +280,7 @@ export const LiveTimeline: React.FC = () => {
           reason: `Mise à jour de la télémétrie des opérations standard du stade.`,
           decision: `Agents de sécurité déployés pour sécuriser les limites du secteur.`,
           announcement: `Aucune diffusion générale requise. Communications actives de l'équipe locale.`,
-          monitoring: `Flux capteur stable. Poursuite de la surveillance normale.`
+          monitoring: `Flux capteur stable. Poursuite de la surveillance normale.`,
         };
       case "hi":
         return {
@@ -268,7 +288,7 @@ export const LiveTimeline: React.FC = () => {
           reason: `मानक स्टेडियम संचालन टेलीमेट्री अपडेट।`,
           decision: `सुरक्षा अधिकारी क्षेत्र की सीमा रेखाओं को सुरक्षित करने के लिए तैनात।`,
           announcement: `कोई सामान्य पीए प्रसारण आवश्यक नहीं है। स्थानीय टीम संचार सक्रिय।`,
-          monitoring: `सेंसर फीड स्थिर। सामान्य निगरानी जारी रखी जा रही है।`
+          monitoring: `सेंसर फीड स्थिर। सामान्य निगरानी जारी रखी जा रही है।`,
         };
       default:
         return {
@@ -276,7 +296,7 @@ export const LiveTimeline: React.FC = () => {
           reason: `Standard stadium operations telemetry update.`,
           decision: `Safety officers dispatched to secure sector boundary lines.`,
           announcement: `No general PA broadcast required. Local team communications active.`,
-          monitoring: `Sensor feed stable. Continuing normal surveillance.`
+          monitoring: `Sensor feed stable. Continuing normal surveillance.`,
         };
     }
   };
@@ -307,37 +327,64 @@ export const LiveTimeline: React.FC = () => {
   const getLocalizedTitle = (title: string) => {
     switch (appLanguage) {
       case "es":
-        if (title.includes("Lot A Near Capacity")) return "Estacionamiento A casi lleno";
-        if (title.includes("Metro Line 2 Delays")) return "Retrasos en Línea 2 del Metro";
-        if (title.includes("Medical Incident - Section 104")) return "Incidente médico - Sección 104";
-        if (title.includes("Lost Child")) return "Niño perdido - Concourse oeste";
-        if (title.includes("Medical Incident - Upper Bowl")) return "Incidente médico - Sector superior 220";
-        if (title.includes("Fire Alarm Triggered")) return "Alarma de incendio - Concourse sur Nivel 2";
-        if (title.includes("Metro Express Line 2 Power Failure")) return "Corte de energía en Línea 2 del Metro";
-        if (title.includes("Severe Lightning Strike Warning")) return "Advertencia grave de impacto de rayos";
-        if (title.includes("VIP Motorcade Transit Block")) return "Bloqueo de tránsito de caravana VIP";
+        if (title.includes("Lot A Near Capacity"))
+          return "Estacionamiento A casi lleno";
+        if (title.includes("Metro Line 2 Delays"))
+          return "Retrasos en Línea 2 del Metro";
+        if (title.includes("Medical Incident - Section 104"))
+          return "Incidente médico - Sección 104";
+        if (title.includes("Lost Child"))
+          return "Niño perdido - Concourse oeste";
+        if (title.includes("Medical Incident - Upper Bowl"))
+          return "Incidente médico - Sector superior 220";
+        if (title.includes("Fire Alarm Triggered"))
+          return "Alarma de incendio - Concourse sur Nivel 2";
+        if (title.includes("Metro Express Line 2 Power Failure"))
+          return "Corte de energía en Línea 2 del Metro";
+        if (title.includes("Severe Lightning Strike Warning"))
+          return "Advertencia grave de impacto de rayos";
+        if (title.includes("VIP Motorcade Transit Block"))
+          return "Bloqueo de tránsito de caravana VIP";
         return title;
       case "fr":
-        if (title.includes("Lot A Near Capacity")) return "Parking A presque plein";
-        if (title.includes("Metro Line 2 Delays")) return "Retards sur la Ligne 2 du Métro";
-        if (title.includes("Medical Incident - Section 104")) return "Incident médical - Section 104";
-        if (title.includes("Lost Child")) return "Enfant perdu - Concourse ouest";
-        if (title.includes("Medical Incident - Upper Bowl")) return "Incident médical - Secteur supérieur 220";
-        if (title.includes("Fire Alarm Triggered")) return "Alarme incendie - Concourse sud Niveau 2";
-        if (title.includes("Metro Express Line 2 Power Failure")) return "Panne d'électricité sur la Ligne 2 du Métro";
-        if (title.includes("Severe Lightning Strike Warning")) return "Alerte foudre grave";
-        if (title.includes("VIP Motorcade Transit Block")) return "Blocage du transit du cortège VIP";
+        if (title.includes("Lot A Near Capacity"))
+          return "Parking A presque plein";
+        if (title.includes("Metro Line 2 Delays"))
+          return "Retards sur la Ligne 2 du Métro";
+        if (title.includes("Medical Incident - Section 104"))
+          return "Incident médical - Section 104";
+        if (title.includes("Lost Child"))
+          return "Enfant perdu - Concourse ouest";
+        if (title.includes("Medical Incident - Upper Bowl"))
+          return "Incident médical - Secteur supérieur 220";
+        if (title.includes("Fire Alarm Triggered"))
+          return "Alarme incendie - Concourse sud Niveau 2";
+        if (title.includes("Metro Express Line 2 Power Failure"))
+          return "Panne d'électricité sur la Ligne 2 du Métro";
+        if (title.includes("Severe Lightning Strike Warning"))
+          return "Alerte foudre grave";
+        if (title.includes("VIP Motorcade Transit Block"))
+          return "Blocage du transit du cortège VIP";
         return title;
       case "hi":
-        if (title.includes("Lot A Near Capacity")) return "पार्किंग लॉट ए क्षमता के करीब है";
-        if (title.includes("Metro Line 2 Delays")) return "मेट्रो लाइन 2 में देरी";
-        if (title.includes("Medical Incident - Section 104")) return "चिकित्सा घटना - धारा 104";
-        if (title.includes("Lost Child")) return "खोया हुआ बच्चा - पश्चिमी गलियारा";
-        if (title.includes("Medical Incident - Upper Bowl")) return "चिकित्सा घटना - ऊपरी बाउल सेक्टर 220";
-        if (title.includes("Fire Alarm Triggered")) return "अग्नि अलार्म - दक्षिणी गलियारा स्तर 2";
-        if (title.includes("Metro Express Line 2 Power Failure")) return "मेट्रो एक्सप्रेस लाइन 2 बिजली विफलता";
-        if (title.includes("Severe Lightning Strike Warning")) return "गंभीर बिजली गिरने की चेतावनी";
-        if (title.includes("VIP Motorcade Transit Block")) return "वीआईपी काफिला मार्ग अवरोध";
+        if (title.includes("Lot A Near Capacity"))
+          return "पार्किंग लॉट ए क्षमता के करीब है";
+        if (title.includes("Metro Line 2 Delays"))
+          return "मेट्रो लाइन 2 में देरी";
+        if (title.includes("Medical Incident - Section 104"))
+          return "चिकित्सा घटना - धारा 104";
+        if (title.includes("Lost Child"))
+          return "खोया हुआ बच्चा - पश्चिमी गलियारा";
+        if (title.includes("Medical Incident - Upper Bowl"))
+          return "चिकित्सा घटना - ऊपरी बाउल सेक्टर 220";
+        if (title.includes("Fire Alarm Triggered"))
+          return "अग्नि अलार्म - दक्षिणी गलियारा स्तर 2";
+        if (title.includes("Metro Express Line 2 Power Failure"))
+          return "मेट्रो एक्सप्रेस लाइन 2 बिजली विफलता";
+        if (title.includes("Severe Lightning Strike Warning"))
+          return "गंभीर बिजली गिरने की चेतावनी";
+        if (title.includes("VIP Motorcade Transit Block"))
+          return "वीआईपी काफिला मार्ग अवरोध";
         return title;
       default:
         return title;
@@ -351,16 +398,18 @@ export const LiveTimeline: React.FC = () => {
         {t.feed_title}
       </h2>
 
-      <div className="flex-1 overflow-y-auto pr-1 space-y-6 max-h-[480px]">
+      <div className="flex-1 overflow-y-auto pr-1 space-y-6 max-h-120">
         {sortedIncidents.length === 0 ? (
-          <p className="text-xs text-gray-500 text-center py-6">{t.feed_no_items}</p>
+          <p className="text-xs text-gray-500 text-center py-6">
+            {t.feed_no_items}
+          </p>
         ) : (
           <ul className="relative border-l border-slate-800 ml-3 space-y-6">
             <AnimatePresence initial={false}>
               {sortedIncidents.map((inc) => {
                 const chain = getMissionChain(inc);
                 return (
-                  <motion.li 
+                  <motion.li
                     key={inc.id}
                     initial={{ opacity: 0, x: -20, height: 0 }}
                     animate={{ opacity: 1, x: 0, height: "auto" }}
@@ -376,10 +425,16 @@ export const LiveTimeline: React.FC = () => {
                     {}
                     <div className="p-4 bg-slate-900/50 hover:bg-slate-900/70 border border-white/5 rounded-xl transition-all space-y-3">
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
-                        <h4 className="text-sm font-black text-gray-100">{getLocalizedTitle(inc.title)}</h4>
+                        <h4 className="text-sm font-black text-gray-100">
+                          {getLocalizedTitle(inc.title)}
+                        </h4>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-gray-500">{inc.timestamp}</span>
-                          <span className={`text-[10px] px-1.5 py-0.5 font-bold rounded uppercase ${getPriorityBadgeClass(inc.priority)}`}>
+                          <span className="text-[10px] text-gray-500">
+                            {inc.timestamp}
+                          </span>
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 font-bold rounded uppercase ${getPriorityBadgeClass(inc.priority)}`}
+                          >
                             {getLocalizedPriority(inc.priority)}
                           </span>
                         </div>
@@ -389,27 +444,41 @@ export const LiveTimeline: React.FC = () => {
                       <div className="text-[11px] space-y-2 border-t border-white/5 pt-2.5">
                         {}
                         <div className="flex items-start gap-2">
-                          <span className="text-slate-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">{t.feed_obs}</span>
+                          <span className="text-slate-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
+                            {t.feed_obs}
+                          </span>
                           <p className="text-gray-300">{chain.obs}</p>
                         </div>
                         {}
                         <div className="flex items-start gap-2">
-                          <span className="text-slate-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">{t.feed_reason}</span>
-                          <p className="text-gray-400 italic">"{chain.reason}"</p>
+                          <span className="text-slate-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
+                            {t.feed_reason}
+                          </span>
+                          <p className="text-gray-400 italic">
+                            "{chain.reason}"
+                          </p>
                         </div>
                         {}
                         <div className="flex items-start gap-2">
-                          <span className="text-emerald-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">{t.feed_decision}</span>
-                          <p className="text-emerald-400 font-semibold">{chain.decision}</p>
+                          <span className="text-emerald-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
+                            {t.feed_decision}
+                          </span>
+                          <p className="text-emerald-400 font-semibold">
+                            {chain.decision}
+                          </p>
                         </div>
                         {}
                         <div className="flex items-start gap-2">
-                          <span className="text-blue-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5 text-blue-400">{t.feed_broadcast}</span>
+                          <span className="text-blue-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
+                            {t.feed_broadcast}
+                          </span>
                           <p className="text-gray-300">{chain.announcement}</p>
                         </div>
                         {}
                         <div className="flex items-start gap-2">
-                          <span className="text-fifa-gold font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">{t.feed_monitoring}</span>
+                          <span className="text-fifa-gold font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
+                            {t.feed_monitoring}
+                          </span>
                           <p className="text-gray-300 flex items-center gap-1">
                             <span className="h-1.5 w-1.5 rounded-full bg-fifa-gold animate-ping"></span>
                             {chain.monitoring}

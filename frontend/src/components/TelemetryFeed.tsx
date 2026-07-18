@@ -1,5 +1,5 @@
 import React from "react";
-import { useCrowdPilot } from "../context/CrowdPilotContext";
+import { useCrowdPilot } from "../hooks/useCrowdPilot";
 import { translations } from "../utils/translations";
 import { CloudSun, Navigation, Car, AlertTriangle } from "lucide-react";
 

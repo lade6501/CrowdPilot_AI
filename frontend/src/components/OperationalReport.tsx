@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useCrowdPilot } from "../context/CrowdPilotContext";
+import { useCrowdPilot } from "../hooks/useCrowdPilot";
 import { Printer, RotateCcw } from "lucide-react";
 
 export const OperationalReport: React.FC = () => {
