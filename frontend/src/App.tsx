@@ -10,7 +10,7 @@ import { UploadPanel } from "./components/UploadPanel";
 import { TelemetryFeed } from "./components/TelemetryFeed";
 import { OperationalReport } from "./components/OperationalReport";
 import { translations } from "./utils/translations";
-import { Brain, Wifi, Key, ShieldAlert, HeartPulse, Flame, AlertOctagon, CloudLightning, Award } from "lucide-react";
+import { Brain, Wifi, Key, ShieldAlert, HeartPulse, Flame, AlertOctagon, CloudLightning, Award, Volume2, VolumeX } from "lucide-react";
 
 const DashboardContent: React.FC = () => {
   const { 
@@ -21,7 +21,9 @@ const DashboardContent: React.FC = () => {
     injectorLoading,
     appLanguage,
     setAppLanguage,
-    updateAutonomyLevel
+    updateAutonomyLevel,
+    voiceAssistEnabled,
+    setVoiceAssistEnabled
   } = useCrowdPilot();
   
   const activeIncidents = (stadiumState?.incidents || []).filter(inc => inc.status === "active");
@@ -146,6 +148,18 @@ const DashboardContent: React.FC = () => {
                 <option value="hi" className="bg-slate-950 text-gray-200">HI (हिन्दी)</option>
               </select>
             </div>
+
+            <button
+              onClick={() => setVoiceAssistEnabled(!voiceAssistEnabled)}
+              title="Toggle Voice Dispatcher Alerts"
+              className={`flex items-center justify-center p-1.5 rounded-xl border transition-all cursor-pointer ${
+                voiceAssistEnabled
+                  ? "bg-fifa-gold/15 text-fifa-gold border-fifa-gold/25"
+                  : "bg-slate-900/60 text-slate-500 border-white/5 hover:text-slate-400"
+              }`}
+            >
+              {voiceAssistEnabled ? <Volume2 className="h-4.5 w-4.5" /> : <VolumeX className="h-4.5 w-4.5" />}
+            </button>
 
             <div className="flex items-center gap-1.5 bg-slate-900 border border-white/5 px-3 py-1 rounded-xl shadow-inner">
               <span className="text-[9px] text-slate-500 font-bold uppercase">Autonomy:</span>

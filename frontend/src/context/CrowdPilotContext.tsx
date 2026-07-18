@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 
 export interface Gate {
@@ -191,6 +191,8 @@ interface CrowdPilotContextType {
   denyAction: (actionId: string) => Promise<void>;
   deployScenarioPlan: (planSummary: string) => Promise<void>;
   translateText: (text: string, targetLang: string) => Promise<string>;
+  voiceAssistEnabled: boolean;
+  setVoiceAssistEnabled: (enabled: boolean) => void;
 }
 
 const CrowdPilotContext = createContext<CrowdPilotContextType | undefined>(undefined);
@@ -221,6 +223,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
   const [stadiumState, setStadiumState] = useState<StadiumState | null>(null);
   const [selectedGate, setSelectedGate] = useState<string | null>(null);
   const [activeTimeSlot, setActiveTimeSlot] = useState<string>("Live Feed");
+  const [voiceAssistEnabled, setVoiceAssistEnabled] = useState<boolean>(true);
   
   
   const [approvedRecIds, setApprovedRecIds] = useState<string[]>([]);
@@ -396,6 +399,51 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       clearTimeout(reconnectTimeout);
     };
   }, []);
+
+  const speakText = useCallback((text: string) => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.pitch = 0.98;
+    const voices = window.speechSynthesis.getVoices();
+    const voice = voices.find(v => v.lang.startsWith("en") && (v.name.includes("David") || v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Male")));
+    if (voice) {
+      utterance.voice = voice;
+    }
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const prevIncidentIds = useRef<string[]>([]);
+  const prevSlaBreached = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!stadiumState || !stadiumState.incidents) return;
+    if (!voiceAssistEnabled) {
+      prevIncidentIds.current = stadiumState.incidents.map(inc => inc.id);
+      return;
+    }
+    const currentIds = stadiumState.incidents.map(inc => inc.id);
+    const newIncidents = stadiumState.incidents.filter(inc => !prevIncidentIds.current.includes(inc.id));
+    if (newIncidents.length > 0) {
+      const firstNew = newIncidents[0];
+      if (firstNew.status === "active") {
+        speakText(`Operations Alert. New incident reported: ${firstNew.title}. ${firstNew.description}`);
+      } else if (firstNew.status === "resolved") {
+        speakText(`Operations Notice. Incident ${firstNew.title} has been resolved.`);
+      }
+    }
+    prevIncidentIds.current = currentIds;
+  }, [stadiumState, voiceAssistEnabled, speakText]);
+
+  useEffect(() => {
+    if (!stadiumState || stadiumState.sla_countdown === undefined || stadiumState.sla_countdown === null) return;
+    const isSlaBreached = stadiumState.sla_countdown === 0;
+    if (voiceAssistEnabled && isSlaBreached && !prevSlaBreached.current) {
+      speakText("Critical emergency warning. Safety SLA breached. AI Autonomy lockout activated. Operator override required.");
+    }
+    prevSlaBreached.current = isSlaBreached;
+  }, [stadiumState, voiceAssistEnabled, speakText]);
 
   const selectReplaySlot = useCallback(async (slot: string) => {
     try {
@@ -581,6 +629,8 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
         denyAction,
         deployScenarioPlan,
         translateText,
+        voiceAssistEnabled,
+        setVoiceAssistEnabled,
       }}
     >
       {children}

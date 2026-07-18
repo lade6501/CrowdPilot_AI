@@ -387,6 +387,7 @@ const MainScene: React.FC<SceneProps> = ({
       <HolographicField />
       <HolographicBowl />
       <AIScanningWave />
+      <HolographicDataDust />
 
       {["Gate A", "Gate B", "Gate C", "Gate D"].map((gate) => (
         <GateNode
@@ -501,6 +502,94 @@ const RainDrop: React.FC<{ start: [number, number, number]; speed: number }> = (
     </mesh>
   );
 };
+const HolographicDataDust: React.FC = () => {
+  const count = 60;
+  const pointsRef = useRef<THREE.Points>(null);
+
+  const [positions, speeds] = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const sp = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 6.5;
+      pos[i * 3] = Math.cos(angle) * radius;
+      pos[i * 3 + 1] = Math.random() * 3.5;
+      pos[i * 3 + 2] = Math.sin(angle) * radius;
+      sp[i] = 0.005 + Math.random() * 0.012;
+    }
+    return [pos, sp];
+  }, []);
+
+  useFrame(() => {
+    if (!pointsRef.current) return;
+    const geo = pointsRef.current.geometry;
+    const attr = geo.attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i < count; i++) {
+      let y = attr.getY(i);
+      y += speeds[i];
+      if (y > 3.5) {
+        y = 0.01;
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 6.5;
+        attr.setX(i, Math.cos(angle) * radius);
+        attr.setZ(i, Math.sin(angle) * radius);
+      }
+      attr.setY(i, y);
+    }
+    attr.needsUpdate = true;
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[positions, 3]}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        color="#38bdf8"
+        size={0.075}
+        transparent
+        opacity={0.32}
+        sizeAttenuation
+        depthWrite={false}
+      />
+    </points>
+  );
+};
+
+const CameraRig: React.FC<{ activePreset: string; controlsRef: React.RefObject<any> }> = ({ activePreset, controlsRef }) => {
+  useFrame((state) => {
+    const targetPos = new THREE.Vector3(9, 8, 9);
+    const targetLookAt = new THREE.Vector3(0, 0, 0);
+
+    if (activePreset === "Gate A") {
+      targetPos.set(0, 5, -8.2);
+      targetLookAt.set(0, 0, -4.5);
+    } else if (activePreset === "Gate B") {
+      targetPos.set(10.2, 5, 0);
+      targetLookAt.set(6.5, 0, 0);
+    } else if (activePreset === "Gate C") {
+      targetPos.set(0, 5, 8.2);
+      targetLookAt.set(0, 0, 4.5);
+    } else if (activePreset === "Gate D") {
+      targetPos.set(-10.2, 5, 0);
+      targetLookAt.set(-6.5, 0, 0);
+    } else {
+      targetPos.set(9, 8, 9);
+      targetLookAt.set(0, 0, 0);
+    }
+
+    state.camera.position.lerp(targetPos, 0.05);
+
+    if (controlsRef.current) {
+      controlsRef.current.target.lerp(targetLookAt, 0.05);
+      controlsRef.current.update();
+    }
+  });
+  return null;
+};
 
 export const StadiumMap3D: React.FC = () => {
   const { stadiumState, selectedGate, setSelectedGate } = useCrowdPilot();
@@ -509,6 +598,8 @@ export const StadiumMap3D: React.FC = () => {
   const [showAIPaths, setShowAIPaths] = useState(true);
   const [showResources, setShowResources] = useState(true);
   const [showPredictions, setShowPredictions] = useState(true);
+  const [cameraPreset, setCameraPreset] = useState<string>("Overview");
+  const controlsRef = useRef<any>(null);
 
   if (!stadiumState) return null;
 
@@ -620,6 +711,23 @@ export const StadiumMap3D: React.FC = () => {
         </span>
       </div>
 
+      <div className="absolute bottom-4 left-4 z-10 flex gap-1 items-center bg-slate-950/85 backdrop-blur-md border border-white/5 p-1 rounded-xl shadow-lg">
+        <span className="text-[7.5px] text-gray-500 uppercase tracking-widest font-black px-1.5 select-none">Presets:</span>
+        {["Overview", "Gate A", "Gate B", "Gate C", "Gate D"].map((preset) => (
+          <button
+            key={preset}
+            onClick={() => setCameraPreset(preset)}
+            className={`px-2 py-0.5 rounded text-[8px] font-bold border transition-all cursor-pointer ${
+              cameraPreset === preset
+                ? "bg-fifa-gold/20 text-fifa-gold border-fifa-gold/30 shadow"
+                : "bg-slate-900/60 text-gray-400 border-transparent hover:text-gray-200"
+            }`}
+          >
+            {preset.replace("Gate ", "")}
+          </button>
+        ))}
+      </div>
+
       <div className="flex-1 w-full h-full">
         <Canvas
           camera={{ position: [9, 8, 9], fov: 42 }}
@@ -641,8 +749,11 @@ export const StadiumMap3D: React.FC = () => {
             getDetourTarget={getDetourTarget}
             getDetourPathPoints={getDetourPathPoints}
           />
+
+          <CameraRig activePreset={cameraPreset} controlsRef={controlsRef} />
           
           <OrbitControls
+            ref={controlsRef}
             enableZoom={false}
             enablePan={false}
             maxPolarAngle={Math.PI / 2.8}
