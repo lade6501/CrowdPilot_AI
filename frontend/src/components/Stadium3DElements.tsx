@@ -2,7 +2,7 @@ import React, { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Line, Html } from "@react-three/drei";
 import * as THREE from "three";
-import { gateCoords, pitchCoords } from "./Stadium3DConstants";
+import { gateCoords } from "./Stadium3DConstants";
 
 export const HolographicField: React.FC = () => {
   return (
@@ -287,7 +287,12 @@ export const GateNode: React.FC<GateNodeProps> = ({
             <span className="text-[8px] font-black text-gray-100 uppercase tracking-wider block">
               {name}
             </span>
-            <span className="text-[8.5px] text-blue-400 font-bold" title="Accessibility assisted gate active">♿</span>
+            <span
+              className="text-[8.5px] text-blue-400 font-bold"
+              title="Accessibility assisted gate active"
+            >
+              ♿
+            </span>
           </div>
           <span
             className={`text-[7.5px] font-bold mt-0.5 block ${
@@ -409,10 +414,10 @@ export const MovingParticle: React.FC<ParticleProps> = ({
   return <mesh ref={meshRef} visible={false} geometry={geom} material={mat} />;
 };
 
-export const Asset3D: React.FC<{ asset: any; dest: [number, number, number] }> = ({
-  asset,
-  dest,
-}) => {
+export const Asset3D: React.FC<{
+  asset: any;
+  dest: [number, number, number];
+}> = ({ asset, dest }) => {
   const ref = useRef<THREE.Group>(null);
   const currentPos = useRef(new THREE.Vector3(0, 0.4, 0));
   const target = useMemo(() => new THREE.Vector3(...dest), [dest]);

@@ -21,16 +21,37 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
 
   const getPredictions = (gateName: string, currentOccupancy: number) => {
     const variance = gateName === "Gate B" && currentOccupancy >= 90 ? 4 : 2;
-    const confidence = gateName === "Gate B" && currentOccupancy >= 90 ? 98 : 88;
+    const confidence =
+      gateName === "Gate B" && currentOccupancy >= 90 ? 98 : 88;
     switch (gateName) {
       case "Gate A":
-        return { pred: Math.min(95, currentOccupancy + 19), eta: 3, variance, confidence };
+        return {
+          pred: Math.min(95, currentOccupancy + 19),
+          eta: 3,
+          variance,
+          confidence,
+        };
       case "Gate B":
-        return { pred: Math.min(100, currentOccupancy + 2), eta: 3, variance, confidence };
+        return {
+          pred: Math.min(100, currentOccupancy + 2),
+          eta: 3,
+          variance,
+          confidence,
+        };
       case "Gate C":
-        return { pred: Math.max(5, currentOccupancy - 8), eta: 1, variance, confidence };
+        return {
+          pred: Math.max(5, currentOccupancy - 8),
+          eta: 1,
+          variance,
+          confidence,
+        };
       case "Gate D":
-        return { pred: Math.min(95, currentOccupancy + 6), eta: 14, variance, confidence };
+        return {
+          pred: Math.min(95, currentOccupancy + 6),
+          eta: 14,
+          variance,
+          confidence,
+        };
       default:
         return { pred: currentOccupancy, eta: 15, variance, confidence: 95 };
     }
@@ -53,7 +74,12 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
       : "border border-emerald-500/30 bg-emerald-950/10";
   };
 
-  const getLocalizedAlertText = (gateName: string, occupancy: number, queue: number, flowRate: number) => {
+  const getLocalizedAlertText = (
+    gateName: string,
+    occupancy: number,
+    queue: number,
+    flowRate: number,
+  ) => {
     if (flowRate === 0 && occupancy > 35) {
       switch (appLanguage) {
         case "es":
@@ -116,27 +142,37 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
         {selectedGate ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xl font-bold text-gray-100">{selectedGate}</span>
-              <span className={`px-2 py-1 text-xs font-semibold rounded-full uppercase tracking-wider ${
-                gates[selectedGate]?.occupancy >= 90
-                  ? "bg-red-500/20 text-red-400"
-                  : gates[selectedGate]?.occupancy >= 75
-                  ? "bg-amber-500/20 text-amber-400"
-                  : "bg-emerald-500/20 text-emerald-400"
-              }`}>
+              <span className="text-xl font-bold text-gray-100">
+                {selectedGate}
+              </span>
+              <span
+                className={`px-2 py-1 text-xs font-semibold rounded-full uppercase tracking-wider ${
+                  gates[selectedGate]?.occupancy >= 90
+                    ? "bg-red-500/20 text-red-400"
+                    : gates[selectedGate]?.occupancy >= 75
+                      ? "bg-amber-500/20 text-amber-400"
+                      : "bg-emerald-500/20 text-emerald-400"
+                }`}
+              >
                 {gates[selectedGate]?.occupancy >= 90
                   ? t.inspector_critical
                   : gates[selectedGate]?.occupancy >= 75
-                  ? t.inspector_warning
-                  : t.inspector_normal}
+                    ? t.inspector_warning
+                    : t.inspector_normal}
               </span>
             </div>
 
-            <div className={`p-4 rounded-xl space-y-3 transition-colors duration-300 ${getGateBorderClass(selectedGate, gates[selectedGate]?.occupancy)}`}>
+            <div
+              className={`p-4 rounded-xl space-y-3 transition-colors duration-300 ${getGateBorderClass(selectedGate, gates[selectedGate]?.occupancy)}`}
+            >
               <div>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">{t.inspector_current}</span>
-                  <span className="text-sm font-extrabold text-gray-100">{gates[selectedGate]?.occupancy}%</span>
+                  <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+                    {t.inspector_current}
+                  </span>
+                  <span className="text-sm font-extrabold text-gray-100">
+                    {gates[selectedGate]?.occupancy}%
+                  </span>
                 </div>
                 <div className="w-full bg-slate-800 rounded-full h-1.5">
                   <div
@@ -144,8 +180,8 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
                       gates[selectedGate]?.occupancy >= 90
                         ? "bg-red-500"
                         : gates[selectedGate]?.occupancy >= 75
-                        ? "bg-amber-500"
-                        : "bg-emerald-500"
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
                     }`}
                     style={{ width: `${gates[selectedGate]?.occupancy}%` }}
                   ></div>
@@ -153,42 +189,66 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
               </div>
 
               {(() => {
-                const pred = getPredictions(selectedGate, gates[selectedGate]?.occupancy);
+                const pred = getPredictions(
+                  selectedGate,
+                  gates[selectedGate]?.occupancy,
+                );
                 return (
                   <div className="pt-2 border-t border-white/5 space-y-2">
-                    {selectedGate === "Gate B" && stadiumState?.sla_countdown !== undefined && stadiumState?.sla_countdown !== null && (
-                      <div className="p-2 bg-red-950/50 border border-red-500/25 rounded-xl flex items-center justify-between text-[10px] animate-pulse">
-                        <span className="text-red-400 font-bold uppercase tracking-wide">⚠️ Safety SLA Limit:</span>
-                        <span className="font-mono font-black text-red-400 text-xs bg-red-950 px-1.5 py-0.5 rounded border border-red-500/30">
-                          {stadiumState.sla_countdown}s
-                        </span>
-                      </div>
-                    )}
+                    {selectedGate === "Gate B" &&
+                      stadiumState?.sla_countdown !== undefined &&
+                      stadiumState?.sla_countdown !== null && (
+                        <div className="p-2 bg-red-950/50 border border-red-500/25 rounded-xl flex items-center justify-between text-[10px] animate-pulse">
+                          <span className="text-red-400 font-bold uppercase tracking-wide">
+                            ⚠️ Safety SLA Limit:
+                          </span>
+                          <span className="font-mono font-black text-red-400 text-xs bg-red-950 px-1.5 py-0.5 rounded border border-red-500/30">
+                            {stadiumState.sla_countdown}s
+                          </span>
+                        </div>
+                      )}
                     <div className="grid grid-cols-3 gap-2 text-center bg-slate-950/60 p-2.5 rounded-xl border border-white/5 mt-2">
                       <div>
-                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-0.5">Prediction</span>
-                        <span className="text-xs font-black text-fifa-gold">{pred.pred}%</span>
-                        <span className="text-[7px] text-gray-600 block">Conf: {pred.confidence}%</span>
+                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-0.5">
+                          Prediction
+                        </span>
+                        <span className="text-xs font-black text-fifa-gold">
+                          {pred.pred}%
+                        </span>
+                        <span className="text-[7px] text-gray-600 block">
+                          Conf: {pred.confidence}%
+                        </span>
                       </div>
                       <div className="border-x border-white/5">
-                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-0.5">ETA</span>
-                        <span className="text-xs font-black text-gray-300">{pred.eta} min</span>
-                        <span className="text-[7px] text-gray-600 block">SLA Threshold</span>
+                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-0.5">
+                          ETA
+                        </span>
+                        <span className="text-xs font-black text-gray-300">
+                          {pred.eta} min
+                        </span>
+                        <span className="text-[7px] text-gray-600 block">
+                          SLA Threshold
+                        </span>
                       </div>
                       <div>
-                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-0.5">Trend</span>
-                        <span className={`text-[10px] font-black uppercase flex items-center justify-center gap-0.5 mt-0.5 ${
-                          pred.pred > (gates[selectedGate]?.occupancy || 0)
-                            ? "text-red-400"
-                            : pred.pred < (gates[selectedGate]?.occupancy || 0)
-                            ? "text-emerald-400"
-                            : "text-slate-400"
-                        }`}>
+                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-0.5">
+                          Trend
+                        </span>
+                        <span
+                          className={`text-[10px] font-black uppercase flex items-center justify-center gap-0.5 mt-0.5 ${
+                            pred.pred > (gates[selectedGate]?.occupancy || 0)
+                              ? "text-red-400"
+                              : pred.pred <
+                                  (gates[selectedGate]?.occupancy || 0)
+                                ? "text-emerald-400"
+                                : "text-slate-400"
+                          }`}
+                        >
                           {pred.pred > (gates[selectedGate]?.occupancy || 0)
                             ? "▲ Rising"
                             : pred.pred < (gates[selectedGate]?.occupancy || 0)
-                            ? "▼ Stable"
-                            : "▬ Constant"}
+                              ? "▼ Stable"
+                              : "▬ Constant"}
                         </span>
                       </div>
                     </div>
@@ -204,7 +264,10 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
                   <span className="text-[10px]">{t.inspector_queue}</span>
                 </div>
                 <span className="text-lg font-bold text-gray-100">
-                  {gates[selectedGate]?.queue} <span className="text-xs font-normal text-gray-400">{t.inspector_units}</span>
+                  {gates[selectedGate]?.queue}{" "}
+                  <span className="text-xs font-normal text-gray-400">
+                    {t.inspector_units}
+                  </span>
                 </span>
               </div>
 
@@ -214,7 +277,10 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
                   <span className="text-[10px]">{t.inspector_flow}</span>
                 </div>
                 <span className="text-lg font-bold text-gray-100">
-                  {gates[selectedGate]?.flow_rate} <span className="text-xs font-normal text-gray-400">{t.inspector_flow_unit}</span>
+                  {gates[selectedGate]?.flow_rate}{" "}
+                  <span className="text-xs font-normal text-gray-400">
+                    {t.inspector_flow_unit}
+                  </span>
                 </span>
               </div>
             </div>
@@ -225,22 +291,30 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
                   <span className="text-sm">♿</span>
                   <span>Accessibility Operations</span>
                 </div>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase ${
-                  gates[selectedGate]?.occupancy >= 75
-                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                    : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                }`}>
-                  {gates[selectedGate]?.occupancy >= 75 ? "Rerouting Carts" : "Assisted Access Active"}
+                <span
+                  className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase ${
+                    gates[selectedGate]?.occupancy >= 75
+                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  }`}
+                >
+                  {gates[selectedGate]?.occupancy >= 75
+                    ? "Rerouting Carts"
+                    : "Assisted Access Active"}
                 </span>
               </div>
               <div className="text-[10px] text-gray-300 leading-relaxed">
                 {gates[selectedGate]?.occupancy >= 75 ? (
                   <span className="text-amber-300/90 font-medium">
-                    ⚠️ High load detected. Mobility carts and wheelchair companion lines are being routed to adjacent gates to bypass queue wait times.
+                    ⚠️ High load detected. Mobility carts and wheelchair
+                    companion lines are being routed to adjacent gates to bypass
+                    queue wait times.
                   </span>
                 ) : (
                   <span>
-                    Featuring dedicated low-gradient wheelchair ramps, audio wayfinding beacons, and priority lanes for spectators with companion seating.
+                    Featuring dedicated low-gradient wheelchair ramps, audio
+                    wayfinding beacons, and priority lanes for spectators with
+                    companion seating.
                   </span>
                 )}
               </div>
@@ -251,20 +325,68 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
                 const gate = gates[selectedGate];
                 if (!gate) return null;
                 const { occupancy, queue, flow_rate } = gate;
-                return getLocalizedAlertText(selectedGate, occupancy, queue, flow_rate);
+                return getLocalizedAlertText(
+                  selectedGate,
+                  occupancy,
+                  queue,
+                  flow_rate,
+                );
               })()}
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-start justify-center h-[260px] border border-dashed border-white/10 rounded-xl p-5 text-gray-400 bg-slate-900/10">
+          <div className="flex flex-col items-start justify-center h-65 border border-dashed border-white/10 rounded-xl p-5 text-gray-400 bg-slate-900/10">
             <span className="text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide flex items-center gap-1.5">
-              <Users className="h-4 w-4 text-fifa-gold" /> {appLanguage === "es" ? "Seleccione una puerta para inspeccionar:" : appLanguage === "fr" ? "Sélectionnez une porte pour inspecter:" : appLanguage === "hi" ? "निरीक्षण करने के लिए एक गेट चुनें:" : "Select a gate to inspect:"}
+              <Users className="h-4 w-4 text-fifa-gold" />{" "}
+              {appLanguage === "es"
+                ? "Seleccione una puerta para inspeccionar:"
+                : appLanguage === "fr"
+                  ? "Sélectionnez une porte pour inspecter:"
+                  : appLanguage === "hi"
+                    ? "निरीक्षण करने के लिए एक गेट चुनें:"
+                    : "Select a gate to inspect:"}
             </span>
             <ul className="space-y-2 text-[11px] text-gray-400 pl-1">
-              <li>• {appLanguage === "es" ? "Carga de Ocupación" : appLanguage === "fr" ? "Charge d'occupation" : appLanguage === "hi" ? "अधिभोग लोड" : "Occupancy load"}</li>
-              <li>• {appLanguage === "es" ? "Tamaño de colas y flujos" : appLanguage === "fr" ? "Taille des files et débits" : appLanguage === "hi" ? "कतार का आकार और प्रवाह" : "Queue trends and arrival rates"}</li>
-              <li>• {appLanguage === "es" ? "Congestión prevista" : appLanguage === "fr" ? "Congestion prévue" : appLanguage === "hi" ? "अनुमानित भीड़" : "Predicted congestion thresholds"}</li>
-              <li>• {appLanguage === "es" ? "Recomendaciones de IA activas" : appLanguage === "fr" ? "Recommandations IA actives" : appLanguage === "hi" ? "सक्रिय एआई सिफारिशें" : "Active AI recommendations"}</li>
+              <li>
+                •{" "}
+                {appLanguage === "es"
+                  ? "Carga de Ocupación"
+                  : appLanguage === "fr"
+                    ? "Charge d'occupation"
+                    : appLanguage === "hi"
+                      ? "अधिभोग लोड"
+                      : "Occupancy load"}
+              </li>
+              <li>
+                •{" "}
+                {appLanguage === "es"
+                  ? "Tamaño de colas y flujos"
+                  : appLanguage === "fr"
+                    ? "Taille des files et débits"
+                    : appLanguage === "hi"
+                      ? "कतार का आकार और प्रवाह"
+                      : "Queue trends and arrival rates"}
+              </li>
+              <li>
+                •{" "}
+                {appLanguage === "es"
+                  ? "Congestión prevista"
+                  : appLanguage === "fr"
+                    ? "Congestion prévue"
+                    : appLanguage === "hi"
+                      ? "अनुमानित भीड़"
+                      : "Predicted congestion thresholds"}
+              </li>
+              <li>
+                •{" "}
+                {appLanguage === "es"
+                  ? "Recomendaciones de IA activas"
+                  : appLanguage === "fr"
+                    ? "Recommandations IA actives"
+                    : appLanguage === "hi"
+                      ? "सक्रिय एआई सिफारिशें"
+                      : "Active AI recommendations"}
+              </li>
             </ul>
           </div>
         )}

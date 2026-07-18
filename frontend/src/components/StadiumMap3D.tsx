@@ -11,7 +11,7 @@ import {
   MovingParticle,
   Asset3D,
   RainDrop,
-  CameraRig
+  CameraRig,
 } from "./Stadium3DElements";
 
 interface SceneProps {
@@ -371,7 +371,7 @@ export const StadiumMap3D: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-[520px] bg-slate-950/40 rounded-2xl border border-white/5 overflow-hidden flex flex-col">
+    <div className="relative w-full h-130 bg-slate-950/40 rounded-2xl border border-white/5 overflow-hidden flex flex-col">
       <div className="absolute top-4 left-4 z-10 flex gap-1 bg-slate-950/80 p-1 rounded-lg border border-white/5 shadow-md">
         <button
           onClick={() => setShowCrowd(!showCrowd)}

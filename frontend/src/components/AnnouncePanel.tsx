@@ -1,25 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { useCrowdPilot } from "../hooks/useCrowdPilot";
 import { translations } from "../utils/translations";
-import { Megaphone, Copy, Check, RotateCcw, Volume2, Play, Pause, QrCode } from "lucide-react";
+import {
+  Megaphone,
+  Copy,
+  Check,
+  RotateCcw,
+  Volume2,
+  Play,
+  Pause,
+  QrCode,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 export const AnnouncePanel: React.FC = () => {
-  const { 
-    generateAnnouncement, 
-    announcementLoading, 
-    announcementResult, 
+  const {
+    generateAnnouncement,
+    announcementLoading,
+    announcementResult,
     clearAnnouncement,
     appLanguage,
-    stadiumState
+    stadiumState,
   } = useCrowdPilot();
-  
-  const [situation, setSituation] = useState<string>("Gate B closed due to technical issues, redirecting to D.");
+
+  const [situation, setSituation] = useState<string>(
+    "Gate B closed due to technical issues, redirecting to D.",
+  );
   const [audience, setAudience] = useState<string>("International Visitors");
   const [tone, setTone] = useState<string>("Calm");
   const [copiedLang, setCopiedLang] = useState<string | null>(null);
-  
-  
+
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [audioProgress, setAudioProgress] = useState<number>(0);
   const [showQR, setShowQR] = useState<string | null>(null);
@@ -28,12 +38,25 @@ export const AnnouncePanel: React.FC = () => {
   const t = translations[appLanguage] || translations.en;
 
   const toneOptions = ["Calm", "Urgent", "Informative"];
-  const audienceOptions = ["International Visitors", "General Public", "South Plaza Visitors"];
+  const audienceOptions = [
+    "International Visitors",
+    "General Public",
+    "South Plaza Visitors",
+  ];
 
   const situations = [
-    { label: "Gate B Congestion", desc: "Gate B is closed. Reroute to Gate D." },
-    { label: "Metro Line 2 Delay", desc: "Metro Line 2 is experiencing a 10-minute delay. Use shuttle buses." },
-    { label: "Heavy Storm Warning", desc: "Heavy rain starting soon. Seek cover inside concourses." },
+    {
+      label: "Gate B Congestion",
+      desc: "Gate B is closed. Reroute to Gate D.",
+    },
+    {
+      label: "Metro Line 2 Delay",
+      desc: "Metro Line 2 is experiencing a 10-minute delay. Use shuttle buses.",
+    },
+    {
+      label: "Heavy Storm Warning",
+      desc: "Heavy rain starting soon. Seek cover inside concourses.",
+    },
   ];
 
   const handleGenerate = (e: React.FormEvent) => {
@@ -48,7 +71,6 @@ export const AnnouncePanel: React.FC = () => {
     setTimeout(() => setCopiedLang(null), 2000);
   };
 
-  
   const speakText = (text: string, langKey: string) => {
     if (activeSpeechLang === langKey) {
       window.speechSynthesis.cancel();
@@ -57,22 +79,20 @@ export const AnnouncePanel: React.FC = () => {
       return;
     }
 
-    
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    
-    
+
     const langLocales: Record<string, string> = {
       english: "en-US",
       spanish: "es-ES",
       french: "fr-FR",
       portuguese: "pt-PT",
-      hindi: "hi-IN"
+      hindi: "hi-IN",
     };
 
     utterance.lang = langLocales[langKey] || "en-US";
-    utterance.rate = 0.92; 
+    utterance.rate = 0.92;
 
     utterance.onstart = () => {
       setActiveSpeechLang(langKey);
@@ -100,14 +120,12 @@ export const AnnouncePanel: React.FC = () => {
     setIsPlaying(false);
   };
 
-  
   useEffect(() => {
     return () => {
       window.speechSynthesis.cancel();
     };
   }, []);
 
- 
   useEffect(() => {
     let interval: any;
     if (isPlaying) {
@@ -130,18 +148,22 @@ export const AnnouncePanel: React.FC = () => {
           <Megaphone className="h-5 w-5 text-fifa-gold" />
           {t.announce_title}
         </h2>
-        <p className="text-xs text-gray-400 mb-3">
-          {t.announce_desc}
-        </p>
+        <p className="text-xs text-gray-400 mb-3">{t.announce_desc}</p>
 
         {}
         {autoDraft && (
           <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-xl mb-4 text-xs space-y-2 border-dashed">
             <div className="flex items-center justify-between text-purple-400 font-bold uppercase tracking-wider text-[8px]">
-              <span className="flex items-center gap-1">🤖 Crowd Flow ➔ Comms Agent Handoff</span>
-              <span className="bg-purple-500/20 text-purple-300 px-1 rounded animate-pulse">Staged</span>
+              <span className="flex items-center gap-1">
+                🤖 Crowd Flow ➔ Comms Agent Handoff
+              </span>
+              <span className="bg-purple-500/20 text-purple-300 px-1 rounded animate-pulse">
+                Staged
+              </span>
             </div>
-            <p className="text-gray-300 italic text-[10px]">"{autoDraft.situation}"</p>
+            <p className="text-gray-300 italic text-[10px]">
+              "{autoDraft.situation}"
+            </p>
             <button
               type="button"
               onClick={() => {
@@ -158,7 +180,9 @@ export const AnnouncePanel: React.FC = () => {
 
         {}
         <div className="space-y-2 mb-4">
-          <span className="text-[10px] text-gray-400 uppercase font-semibold">Quick Situations</span>
+          <span className="text-[10px] text-gray-400 uppercase font-semibold">
+            Quick Situations
+          </span>
           <div className="flex flex-wrap gap-2">
             {situations.map((sit, i) => (
               <button
@@ -177,7 +201,9 @@ export const AnnouncePanel: React.FC = () => {
         {}
         <form onSubmit={handleGenerate} className="space-y-3">
           <div className="space-y-1">
-            <label className="text-[10px] text-gray-400 uppercase font-semibold">{t.announce_sit_label}</label>
+            <label className="text-[10px] text-gray-400 uppercase font-semibold">
+              {t.announce_sit_label}
+            </label>
             <input
               type="text"
               value={situation}
@@ -190,7 +216,9 @@ export const AnnouncePanel: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-[10px] text-gray-400 uppercase font-semibold">{t.announce_aud_label}</label>
+              <label className="text-[10px] text-gray-400 uppercase font-semibold">
+                {t.announce_aud_label}
+              </label>
               <select
                 value={audience}
                 onChange={(e) => setAudience(e.target.value)}
@@ -198,13 +226,17 @@ export const AnnouncePanel: React.FC = () => {
                 className="w-full text-xs px-3 py-2 rounded-xl glass-input"
               >
                 {audienceOptions.map((opt) => (
-                  <option key={opt} value={opt} className="bg-slate-950">{opt}</option>
+                  <option key={opt} value={opt} className="bg-slate-950">
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] text-gray-400 uppercase font-semibold">{t.announce_tone_label}</label>
+              <label className="text-[10px] text-gray-400 uppercase font-semibold">
+                {t.announce_tone_label}
+              </label>
               <select
                 value={tone}
                 onChange={(e) => setTone(e.target.value)}
@@ -212,7 +244,9 @@ export const AnnouncePanel: React.FC = () => {
                 className="w-full text-xs px-3 py-2 rounded-xl glass-input"
               >
                 {toneOptions.map((opt) => (
-                  <option key={opt} value={opt} className="bg-slate-950">{opt}</option>
+                  <option key={opt} value={opt} className="bg-slate-950">
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
@@ -239,7 +273,9 @@ export const AnnouncePanel: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-12 text-gray-500 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-fifa-gold mb-3"></div>
             <p className="text-xs">{t.announce_generating}</p>
-            <p className="text-[10px] opacity-75 mt-0.5">{t.announce_agent_msg}</p>
+            <p className="text-[10px] opacity-75 mt-0.5">
+              {t.announce_agent_msg}
+            </p>
           </div>
         )}
 
@@ -261,62 +297,108 @@ export const AnnouncePanel: React.FC = () => {
             <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl flex items-center justify-between gap-4 text-xs">
               <button
                 type="button"
-                onClick={isPlaying ? stopSpeech : () => speakText(announcementResult.english, "english")}
+                onClick={
+                  isPlaying
+                    ? stopSpeech
+                    : () => speakText(announcementResult.english, "english")
+                }
                 className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 active:scale-90 transition-all ${
-                  isPlaying 
-                    ? "bg-red-500/20 text-red-400 border border-red-500/30" 
+                  isPlaying
+                    ? "bg-red-500/20 text-red-400 border border-red-500/30"
                     : "bg-fifa-gold hover:bg-yellow-600 text-slate-950"
                 }`}
               >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 pl-0.5" />}
+                {isPlaying ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4 pl-0.5" />
+                )}
               </button>
-              
+
               {}
               <div className="flex-1 flex flex-col justify-center">
                 <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-1">
-                  {isPlaying ? `${t.announce_listening}: ${activeSpeechLang?.toUpperCase()}` : "PA Audio Ready"}
+                  {isPlaying
+                    ? `${t.announce_listening}: ${activeSpeechLang?.toUpperCase()}`
+                    : "PA Audio Ready"}
                 </span>
                 <div className="flex items-center gap-1 h-5">
-                  {[4, 12, 8, 20, 16, 24, 10, 18, 14, 28, 6, 12, 16, 20, 8, 22, 12, 4].map((h, i) => {
+                  {[
+                    4, 12, 8, 20, 16, 24, 10, 18, 14, 28, 6, 12, 16, 20, 8, 22,
+                    12, 4,
+                  ].map((h, i) => {
                     const isActive = isPlaying;
                     return (
-                      <div 
-                        key={i} 
+                      <div
+                        key={i}
                         className={`w-1 rounded-full transition-all duration-300 ${
                           isActive ? "bg-fifa-gold" : "bg-slate-800"
                         }`}
-                        style={{ 
-                          height: isPlaying ? `${Math.max(4, h + Math.sin((audioProgress + i) * 0.4) * 6)}px` : "4px" 
+                        style={{
+                          height: isPlaying
+                            ? `${Math.max(4, h + Math.sin((audioProgress + i) * 0.4) * 6)}px`
+                            : "4px",
                         }}
                       ></div>
                     );
                   })}
                 </div>
               </div>
-              
+
               <span className="text-[10px] text-gray-500 font-mono shrink-0">
-                {isPlaying ? `0:${Math.floor((audioProgress/100)*14).toString().padStart(2, "0")}` : "0:00"}
+                {isPlaying
+                  ? `0:${Math.floor((audioProgress / 100) * 14)
+                      .toString()
+                      .padStart(2, "0")}`
+                  : "0:00"}
               </span>
             </div>
 
             {}
-            <div className="max-h-[220px] overflow-y-auto space-y-3 pr-1">
+            <div className="max-h-55 overflow-y-auto space-y-3 pr-1">
               {[
-                { key: "english", label: "English", text: announcementResult.english },
-                { key: "spanish", label: "Español", text: announcementResult.spanish },
-                { key: "french", label: "Français", text: announcementResult.french },
-                { key: "portuguese", label: "Português", text: announcementResult.portuguese },
-                { key: "hindi", label: "हिन्दी (Hindi)", text: announcementResult.hindi },
+                {
+                  key: "english",
+                  label: "English",
+                  text: announcementResult.english,
+                },
+                {
+                  key: "spanish",
+                  label: "Español",
+                  text: announcementResult.spanish,
+                },
+                {
+                  key: "french",
+                  label: "Français",
+                  text: announcementResult.french,
+                },
+                {
+                  key: "portuguese",
+                  label: "Português",
+                  text: announcementResult.portuguese,
+                },
+                {
+                  key: "hindi",
+                  label: "हिन्दी (Hindi)",
+                  text: announcementResult.hindi,
+                },
               ].map((lang) => (
-                <div key={lang.key} className="bg-slate-900/50 p-3 rounded-xl border border-white/5 relative group/item space-y-2">
+                <div
+                  key={lang.key}
+                  className="bg-slate-900/50 p-3 rounded-xl border border-white/5 relative group/item space-y-2"
+                >
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-bold text-fifa-gold uppercase tracking-wider">{lang.label}</span>
+                    <span className="text-[10px] font-bold text-fifa-gold uppercase tracking-wider">
+                      {lang.label}
+                    </span>
                     <div className="flex items-center gap-1.5 opacity-60 group-hover/item:opacity-100 transition-opacity">
                       {}
                       <button
                         onClick={() => speakText(lang.text, lang.key)}
                         className={`p-1 rounded hover:bg-slate-800 transition-colors ${
-                          activeSpeechLang === lang.key ? "text-fifa-gold" : "text-gray-500 hover:text-gray-300"
+                          activeSpeechLang === lang.key
+                            ? "text-fifa-gold"
+                            : "text-gray-500 hover:text-gray-300"
                         }`}
                         title="Listen to PA voice synthesis"
                       >
@@ -339,10 +421,12 @@ export const AnnouncePanel: React.FC = () => {
                           <Copy className="h-3 w-3" />
                         )}
                       </button>
-                      
+
                       {}
                       <button
-                        onClick={() => setShowQR(showQR === lang.key ? null : lang.key)}
+                        onClick={() =>
+                          setShowQR(showQR === lang.key ? null : lang.key)
+                        }
                         className="text-gray-500 hover:text-gray-300 p-1 rounded hover:bg-slate-800 transition-colors"
                         title={t.announce_push_terminal}
                       >
@@ -354,15 +438,24 @@ export const AnnouncePanel: React.FC = () => {
                   {}
                   {showQR === lang.key && (
                     <div className="p-3 bg-slate-950 rounded-lg border border-white/10 flex flex-col items-center justify-center text-center space-y-2">
-                      <svg viewBox="0 0 100 100" className="h-28 w-28 fill-gray-200">
+                      <svg
+                        viewBox="0 0 100 100"
+                        className="h-28 w-28 fill-gray-200"
+                      >
                         <path d="M5,5 h30 v30 h-30 z M15,15 h10 v10 h-10 z M65,5 h30 v30 h-30 z M75,15 h10 v10 h-10 z M5,65 h30 v30 h-30 z M15,75 h10 v10 h-10 z M45,45 h10 v10 h-10 z M55,55 h15 v5 h-15 z M45,75 h5 v15 h-5 z M85,65 h10 v20 h-10 z M55,85 h15 v5 h-15 z" />
                       </svg>
-                      <span className="text-[9px] text-gray-400 uppercase tracking-widest font-bold">{t.announce_push_terminal}</span>
-                      <p className="text-[8px] text-slate-500">{t.announce_push_desc}</p>
+                      <span className="text-[9px] text-gray-400 uppercase tracking-widest font-bold">
+                        {t.announce_push_terminal}
+                      </span>
+                      <p className="text-[8px] text-slate-500">
+                        {t.announce_push_desc}
+                      </p>
                     </div>
                   )}
 
-                  <p className={`text-xs text-gray-300 leading-relaxed ${lang.key === "hindi" ? "font-serif text-sm" : ""}`}>
+                  <p
+                    className={`text-xs text-gray-300 leading-relaxed ${lang.key === "hindi" ? "font-serif text-sm" : ""}`}
+                  >
                     {lang.text}
                   </p>
                 </div>
