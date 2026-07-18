@@ -12,6 +12,69 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AITranslate } from "./AITranslate";
+import type { AgentAction } from "../context/CrowdPilotContextInstance";
+
+const RESOLVED_ACTION_STATUSES = [
+  "approved",
+  "auto_executed",
+  "denied",
+  "failed_governance",
+];
+
+const getRiskBadgeClass = (risk: string) => {
+  switch (risk) {
+    case "High":
+      return "bg-red-500/20 text-red-400 border border-red-500/30";
+    case "Medium":
+      return "bg-amber-500/20 text-amber-400 border border-amber-500/30";
+    default:
+      return "bg-slate-500/20 text-slate-400 border border-white/5";
+  }
+};
+
+const getStatusBadge = (action: AgentAction) => {
+  switch (action.status) {
+    case "auto_executed":
+      return (
+        <span className="bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded text-[9px] font-bold uppercase flex items-center gap-1">
+          <Cpu className="h-2.5 w-2.5" /> Auto-Executed
+        </span>
+      );
+    case "approved":
+      return (
+        <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
+          Approved
+        </span>
+      );
+    case "denied":
+      return (
+        <span className="bg-slate-800 text-gray-500 border border-white/5 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
+          Denied
+        </span>
+      );
+    case "resolved_by_governance":
+      return (
+        <span className="bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
+          Resolved &amp; Merged
+        </span>
+      );
+    case "failed_governance":
+      return (
+        <span className="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
+          Blocked
+        </span>
+      );
+    default:
+      return (
+        <span className="bg-amber-500/10 text-amber-400 border border-amber-500/25 px-2 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse">
+          Pending
+        </span>
+      );
+  }
+};
+
+const isResolvedAction = (action: AgentAction) =>
+  RESOLVED_ACTION_STATUSES.includes(action.status);
 
 export const ActionQueue: React.FC = () => {
   const { stadiumState, approveAction, denyAction } = useCrowdPilot();
@@ -19,60 +82,8 @@ export const ActionQueue: React.FC = () => {
   if (!stadiumState) return null;
 
   const actions = stadiumState.actions_queue || [];
-
   const sortedActions = [...actions].reverse();
-
-  const getRiskBadgeClass = (risk: string) => {
-    switch (risk) {
-      case "High":
-        return "bg-red-500/20 text-red-400 border border-red-500/30";
-      case "Medium":
-        return "bg-amber-500/20 text-amber-400 border border-amber-500/30";
-      default:
-        return "bg-slate-500/20 text-slate-400 border border-white/5";
-    }
-  };
-
-  const getStatusBadge = (action: any) => {
-    switch (action.status) {
-      case "auto_executed":
-        return (
-          <span className="bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded text-[9px] font-bold uppercase flex items-center gap-1">
-            <Cpu className="h-2.5 w-2.5" /> Auto-Executed
-          </span>
-        );
-      case "approved":
-        return (
-          <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
-            Approved
-          </span>
-        );
-      case "denied":
-        return (
-          <span className="bg-slate-800 text-gray-500 border border-white/5 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
-            Denied
-          </span>
-        );
-      case "resolved_by_governance":
-        return (
-          <span className="bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
-            Resolved &amp; Merged
-          </span>
-        );
-      case "failed_governance":
-        return (
-          <span className="bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
-            Blocked
-          </span>
-        );
-      default:
-        return (
-          <span className="bg-amber-500/10 text-amber-400 border border-amber-500/25 px-2 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse">
-            Pending
-          </span>
-        );
-    }
-  };
+  const resolvedActions = actions.filter(isResolvedAction);
 
   return (
     <div className="glass-panel rounded-2xl p-6 h-full flex flex-col justify-between">
@@ -82,7 +93,6 @@ export const ActionQueue: React.FC = () => {
             <Shield className="h-4.5 w-4.5 text-fifa-gold" />
             Agentic Action Queue
           </h2>
-          {}
           <div className="flex items-center gap-1.5 bg-slate-900 border border-white/5 px-2 py-0.5 rounded-lg text-[8px] font-mono text-slate-400">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>3 Active (JL, VM, DK)</span>
@@ -102,7 +112,7 @@ export const ActionQueue: React.FC = () => {
           </div>
           <div className="border-x border-white/5">
             <span className="text-[8px] text-gray-500 font-bold uppercase block tracking-wider mb-0.5">
-              Success Rate
+          Success Rate
             </span>
             <span className="text-sm font-black text-emerald-400">93%</span>
           </div>
@@ -114,7 +124,6 @@ export const ActionQueue: React.FC = () => {
           </div>
         </div>
 
-        {}
         <div className="space-y-4 max-h-95 overflow-y-auto pr-1">
           {sortedActions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 border border-dashed border-white/10 rounded-xl text-center text-gray-500 text-xs">
@@ -155,21 +164,18 @@ export const ActionQueue: React.FC = () => {
                               : "border-white/5 bg-slate-900/60"
                     }`}
                   >
-                    {}
                     {isConflict && (
                       <div className="w-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold px-2 py-0.5 rounded text-[8px] tracking-wide uppercase inline-flex items-center gap-1 animate-pulse">
                         ⚠️ CONFLICT DETECTED: COMPETING AGENT DIRECTIVES
                       </div>
                     )}
 
-                    {}
                     {isSlaBreach && (
                       <div className="w-full bg-red-500/20 border border-red-500/40 text-red-400 font-black px-2 py-0.5 rounded text-[8px] tracking-wide uppercase inline-flex items-center gap-1">
                         🚨 CRITICAL SAFETY SLA BREACH EXCEEDED
                       </div>
                     )}
 
-                    {}
                     {act.status === "pending" && (
                       <div className="text-[8px] text-fifa-gold font-mono flex items-center gap-1 animate-pulse">
                         👁️ Operator J. Lee is currently reviewing this
@@ -177,7 +183,6 @@ export const ActionQueue: React.FC = () => {
                       </div>
                     )}
 
-                    {}
                     <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-2">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-gray-200 text-xs">
@@ -197,7 +202,6 @@ export const ActionQueue: React.FC = () => {
                       </div>
                     </div>
 
-                    {}
                     <div className="text-[11px] space-y-2 text-gray-300">
                       <p>
                         <strong className="text-gray-400 font-bold uppercase tracking-wider text-[8px] block">
@@ -213,7 +217,6 @@ export const ActionQueue: React.FC = () => {
                       </p>
                     </div>
 
-                    {}
                     <div className="text-[10px] p-2 rounded bg-slate-950/80 border border-white/5 space-y-1">
                       <div className="flex items-center justify-between font-bold text-gray-400">
                         <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider">
@@ -250,7 +253,6 @@ export const ActionQueue: React.FC = () => {
                       )}
                     </div>
 
-                    {}
                     {act.verification_status !== "not_started" && (
                       <div
                         className={`text-[10px] p-2.5 rounded-lg border flex items-start gap-2 ${
@@ -287,7 +289,6 @@ export const ActionQueue: React.FC = () => {
                       </div>
                     )}
 
-                    {}
                     {act.status === "pending" &&
                       (act.governance_check === "passed" ||
                         (act.governance_check === "failed" && isSlaBreach)) && (
@@ -321,34 +322,17 @@ export const ActionQueue: React.FC = () => {
         </div>
       </div>
 
-      {}
       <div className="border-t border-white/5 pt-4 mt-4 font-mono text-[9px] text-slate-500 space-y-1.5">
         <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block">
           Live Action Audit Trail
         </span>
         <div className="bg-slate-950/60 p-2.5 rounded-lg border border-white/5 max-h-21.25 overflow-y-auto space-y-1 select-text">
-          {actions.filter((a) =>
-            [
-              "approved",
-              "auto_executed",
-              "denied",
-              "failed_governance",
-            ].includes(a.status),
-          ).length === 0 ? (
+          {resolvedActions.length === 0 ? (
             <span className="text-slate-600 italic">
               No resolved operational trails logged yet.
             </span>
           ) : (
-            actions
-              .filter((a) =>
-                [
-                  "approved",
-                  "auto_executed",
-                  "denied",
-                  "failed_governance",
-                ].includes(a.status),
-              )
-              .map((act, i) => {
+            resolvedActions.map((act, i) => {
                 const resolver =
                   act.status === "auto_executed"
                     ? "AI Engine"
@@ -368,7 +352,7 @@ export const ActionQueue: React.FC = () => {
 
                 return (
                   <div
-                    key={i}
+                    key={act.id}
                     className="leading-normal border-b border-white/5 pb-1 last:border-0 last:pb-0"
                   >
                     <span className="text-fifa-gold">[{act.timestamp}]</span>{" "}

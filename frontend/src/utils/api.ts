@@ -1,5 +1,14 @@
+interface WindowWithProcess extends Window {
+  process?: {
+    env?: {
+      BASE_URL?: string;
+    };
+  };
+}
+
 export const getBaseUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL || (window as any).process?.env?.BASE_URL || "http://localhost:8000";
+  const browserBaseUrl = (window as WindowWithProcess).process?.env?.BASE_URL;
+  const envUrl = import.meta.env.VITE_API_URL || browserBaseUrl || "http://localhost:8000";
   return envUrl.replace(/\/$/, "");
 };
 

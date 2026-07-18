@@ -1,5 +1,6 @@
 import React from "react";
 import { gateCoords2D } from "./stadiumConstants";
+import type { StadiumState } from "../../context/CrowdPilotContextInstance";
 
 interface IncidentLayerProps {
   isFire: boolean;
@@ -7,7 +8,7 @@ interface IncidentLayerProps {
   isMedical: boolean;
   criticalGates: string[];
   selectedGate: string | null;
-  stadiumState: any;
+  stadiumState: StadiumState;
 }
 
 export const IncidentLayer: React.FC<IncidentLayerProps> = ({

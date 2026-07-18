@@ -1,18 +1,21 @@
 import React from "react";
 import { Brain, Wifi, Key, Volume2, VolumeX } from "lucide-react";
+import type { AppLang } from "../../utils/translations";
+import type { AgentAction, StadiumState } from "../../context/CrowdPilotContextInstance";
+import { translations } from "../../utils/translations";
 
 interface AppHeaderProps {
-  t: any;
-  stadiumState: any;
+  t: typeof translations.en;
+  stadiumState: StadiumState | null;
   tick: number;
-  appLanguage: string;
-  setAppLanguage: (lang: any) => void;
+  appLanguage: AppLang;
+  setAppLanguage: (lang: AppLang) => void;
   voiceAssistEnabled: boolean;
   setVoiceAssistEnabled: (enabled: boolean) => void;
   updateAutonomyLevel: (level: string) => void;
   apiConfigured: boolean | null;
   hasActiveIncidents: boolean;
-  activeActions: any[];
+  activeActions: AgentAction[];
   isReasoning: boolean;
   hasReasoned: boolean;
   isActing: boolean;
@@ -106,7 +109,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               </span>
               <select
                 value={appLanguage}
-                onChange={(e) => setAppLanguage(e.target.value as any)}
+                onChange={(event) => setAppLanguage(event.target.value as AppLang)}
                 className="bg-transparent text-xs text-fifa-gold font-bold focus:outline-none cursor-pointer"
               >
                 <option value="en" className="bg-slate-950 text-gray-200">

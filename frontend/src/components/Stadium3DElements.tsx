@@ -4,6 +4,7 @@ import { Line, Html } from "@react-three/drei";
 import * as THREE from "three";
 
 import { gateCoords } from "./Stadium3DConstants";
+import type { OperationalAsset } from "../context/CrowdPilotContextInstance";
 
 export const HolographicField: React.FC = () => {
   return (
@@ -416,7 +417,7 @@ export const MovingParticle: React.FC<ParticleProps> = ({
 };
 
 export const Asset3D: React.FC<{
-  asset: any;
+  asset: OperationalAsset;
   dest: [number, number, number];
 }> = ({ asset, dest }) => {
   const ref = useRef<THREE.Group>(null);

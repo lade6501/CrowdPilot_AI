@@ -52,8 +52,6 @@ export const ScenarioPanel: React.FC = () => {
         <p className="text-xs text-gray-400 mb-4">
           {t.scenario_desc}
         </p>
-
-        {}
         <div className="flex flex-wrap gap-2 mb-4">
           {templates.map((temp) => (
             <button
@@ -67,8 +65,6 @@ export const ScenarioPanel: React.FC = () => {
             </button>
           ))}
         </div>
-
-        {}
         <form onSubmit={handleSimulate} className="flex gap-2">
           <input
             type="text"
@@ -92,8 +88,6 @@ export const ScenarioPanel: React.FC = () => {
           </button>
         </form>
       </div>
-
-      {}
       <div className="mt-6 flex-1 flex flex-col justify-center">
         {simulationLoading && (
           <div className="flex flex-col items-center justify-center py-12 text-gray-500 text-center">
@@ -117,7 +111,6 @@ export const ScenarioPanel: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="space-y-4"
           >
-            {}
             <div className="p-3 bg-slate-950/60 border border-white/5 rounded-xl text-xs">
               <div className="flex justify-between items-center mb-1">
                 <span className="text-[10px] uppercase font-bold text-amber-500 tracking-wider flex items-center gap-1">
@@ -129,8 +122,6 @@ export const ScenarioPanel: React.FC = () => {
               </div>
               <p className="text-gray-300 leading-relaxed italic">"{simulationResult.summary}"</p>
             </div>
-
-            {}
             <div className="space-y-3 bg-slate-950/40 p-4 border border-white/5 rounded-xl">
               <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider block">{t.scenario_flow_title}</span>
               
@@ -188,8 +179,6 @@ export const ScenarioPanel: React.FC = () => {
                 })}
               </div>
             </div>
-
-            {}
             <div className="bg-slate-900/60 p-3 rounded-xl border border-white/5 flex items-center justify-between text-xs">
               <span className="text-gray-400 font-medium">{t.scenario_delay}</span>
               <span className={`text-sm font-extrabold ${simulationResult.average_delay_change_mins > 0 ? "text-red-400" : "text-emerald-400"}`}>
@@ -197,8 +186,6 @@ export const ScenarioPanel: React.FC = () => {
                 {simulationResult.average_delay_change_mins} min
               </span>
             </div>
-
-            {}
             <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl text-xs">
               <span className="text-[10px] text-fifa-gold font-bold uppercase tracking-wider block mb-1">{t.scenario_mitigations}</span>
               <ul className="space-y-1.5 text-gray-300">

@@ -10,6 +10,46 @@ import {
   Train,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { AppLang } from "../utils/translations";
+import type { Incident } from "../context/CrowdPilotContextInstance";
+
+interface MissionChain {
+  obs: string;
+  reason: string;
+  decision: string;
+  announcement: string;
+  monitoring: string;
+}
+
+const gateTranslations: Record<string, Partial<Record<AppLang, string>>> = {
+  "Gate A": { es: "Puerta A", fr: "Porte A", hi: "गेट A" },
+  "Gate B": { es: "Puerta B", fr: "Porte B", hi: "गेट B" },
+  "Gate C": { es: "Puerta C", fr: "Porte C", hi: "गेट C" },
+  "Gate D": { es: "Puerta D", fr: "Porte D", hi: "गेट D" },
+};
+
+const lotTranslations: Record<string, Partial<Record<AppLang, string>>> = {
+  "Parking Lot A": {
+    es: "Estacionamiento A",
+    fr: "Parking A",
+    hi: "पार्किंग स्थल A",
+  },
+  "Parking Lot B": {
+    es: "Estacionamiento B",
+    fr: "Parking B",
+    hi: "पार्किंग स्थल B",
+  },
+  "Parking Lot C": {
+    es: "Estacionamiento C",
+    fr: "Parking C",
+    hi: "पार्किंग स्थल C",
+  },
+  "Parking Lot D": {
+    es: "Estacionamiento D",
+    fr: "Parking D",
+    hi: "पार्किंग स्थल D",
+  },
+};
 
 export const LiveTimeline: React.FC = () => {
   const { stadiumState, appLanguage } = useCrowdPilot();
@@ -53,7 +93,7 @@ export const LiveTimeline: React.FC = () => {
     b.id.localeCompare(a.id),
   );
 
-  const getMissionChain = (inc: any) => {
+  const getMissionChain = (inc: Incident): MissionChain => {
     if (inc.type === "medical") {
       switch (appLanguage) {
         case "es":
@@ -202,19 +242,13 @@ export const LiveTimeline: React.FC = () => {
       }
     }
 
-    const translateIncidentDescription = (desc: string, lang: string) => {
+    const translateIncidentDescription = (desc: string, lang: AppLang) => {
       if (lang === "en") return desc;
       let text = desc;
       if (text.includes("occupancy exceeded 90% threshold")) {
         const match = text.match(/(Gate [A-D])/);
         const gate = match ? match[1] : "Gate";
-        const gateMap: Record<string, Record<string, string>> = {
-          "Gate A": { es: "Puerta A", fr: "Porte A", hi: "गेट A" },
-          "Gate B": { es: "Puerta B", fr: "Porte B", hi: "गेट B" },
-          "Gate C": { es: "Puerta C", fr: "Porte C", hi: "गेट C" },
-          "Gate D": { es: "Puerta D", fr: "Porte D", hi: "गेट D" },
-        };
-        const gTrans = gateMap[gate]?.[lang] || gate;
+        const gTrans = gateTranslations[gate]?.[lang] || gate;
         if (lang === "es") {
           return `La ocupación en la ${gTrans} superó el umbral del 90% durante más de 20s sin que se completara la mitigación. SLA incumplido.`;
         }
@@ -230,29 +264,7 @@ export const LiveTimeline: React.FC = () => {
         const lot = lotMatch ? lotMatch[1] : "Parking Lot";
         const capMatch = text.match(/(\d+)%/);
         const cap = capMatch ? capMatch[1] : "80";
-        const lotMap: Record<string, Record<string, string>> = {
-          "Parking Lot A": {
-            es: "Estacionamiento A",
-            fr: "Parking A",
-            hi: "पार्किंग स्थल A",
-          },
-          "Parking Lot B": {
-            es: "Estacionamiento B",
-            fr: "Parking B",
-            hi: "पार्किंग स्थल B",
-          },
-          "Parking Lot C": {
-            es: "Estacionamiento C",
-            fr: "Parking C",
-            hi: "पार्किंग स्थल C",
-          },
-          "Parking Lot D": {
-            es: "Estacionamiento D",
-            fr: "Parking D",
-            hi: "पार्किंग स्थल D",
-          },
-        };
-        const lTrans = lotMap[lot]?.[lang] || lot;
+        const lTrans = lotTranslations[lot]?.[lang] || lot;
         if (lang === "es") {
           return `${lTrans} está al ${cap}% de capacidad. Oficiales dirigiendo hacia el Estacionamiento C.`;
         }
@@ -418,12 +430,10 @@ export const LiveTimeline: React.FC = () => {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     className="mb-6 pl-6 relative group"
                   >
-                    {}
                     <span className="absolute -left-3.5 top-1.5 flex items-center justify-center bg-slate-950 border border-slate-700 rounded-full w-7 h-7 shadow-[0_0_10px_rgba(0,0,0,0.5)] group-hover:border-fifa-gold transition-colors duration-200">
                       {getIncidentIcon(inc.type)}
                     </span>
 
-                    {}
                     <div className="p-4 bg-slate-900/50 hover:bg-slate-900/70 border border-white/5 rounded-xl transition-all space-y-3">
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                         <h4 className="text-sm font-black text-gray-100">
@@ -441,16 +451,13 @@ export const LiveTimeline: React.FC = () => {
                         </div>
                       </div>
 
-                      {}
                       <div className="text-[11px] space-y-2 border-t border-white/5 pt-2.5">
-                        {}
                         <div className="flex items-start gap-2">
                           <span className="text-slate-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
                             {t.feed_obs}
                           </span>
                           <p className="text-gray-300">{chain.obs}</p>
                         </div>
-                        {}
                         <div className="flex items-start gap-2">
                           <span className="text-slate-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
                             {t.feed_reason}
@@ -459,7 +466,6 @@ export const LiveTimeline: React.FC = () => {
                             "{chain.reason}"
                           </p>
                         </div>
-                        {}
                         <div className="flex items-start gap-2">
                           <span className="text-emerald-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
                             {t.feed_decision}
@@ -468,14 +474,12 @@ export const LiveTimeline: React.FC = () => {
                             {chain.decision}
                           </p>
                         </div>
-                        {}
                         <div className="flex items-start gap-2">
                           <span className="text-blue-500 font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
                             {t.feed_broadcast}
                           </span>
                           <p className="text-gray-300">{chain.announcement}</p>
                         </div>
-                        {}
                         <div className="flex items-start gap-2">
                           <span className="text-fifa-gold font-bold uppercase w-16 shrink-0 text-[9px] mt-0.5">
                             {t.feed_monitoring}

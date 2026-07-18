@@ -1,9 +1,11 @@
 import React from "react";
 import { Sparkles } from "lucide-react";
+import { translations } from "../../utils/translations";
+import type { StadiumState } from "../../context/CrowdPilotContextInstance";
 
 interface StadiumHeaderProps {
-  t: any;
-  stadiumState: any;
+  t: typeof translations.en;
+  stadiumState: StadiumState;
   activeTimeSlot: string;
   viewMode: "2D" | "3D";
   setViewMode: (mode: "2D" | "3D") => void;

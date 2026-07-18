@@ -14,11 +14,12 @@ import {
   RainDrop,
   CameraRig,
 } from "./Stadium3DElements";
+import type { Gate, Incident, OperationalAsset } from "../context/CrowdPilotContextInstance";
 
 interface SceneProps {
-  gates: any;
-  incidents: any[];
-  assets: any[];
+  gates: Record<string, Gate>;
+  incidents: Incident[];
+  assets: OperationalAsset[];
   showCrowd: boolean;
   showAIPaths: boolean;
   showPredictions: boolean;
@@ -246,7 +247,7 @@ const MainScene: React.FC<SceneProps> = ({
 
       {showResources &&
         assets.map((asset) => {
-          const destCoord = gateCoords[asset.gate] || [0, 0, 0];
+          const destCoord = gateCoords[asset.gate || ""] || [0, 0, 0];
           return <Asset3D key={asset.id} asset={asset} dest={destCoord} />;
         })}
 

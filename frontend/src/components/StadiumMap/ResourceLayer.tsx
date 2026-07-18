@@ -1,7 +1,8 @@
 import React from "react";
+import type { StadiumState } from "../../context/CrowdPilotContextInstance";
 
 interface ResourceLayerProps {
-  stadiumState: any;
+  stadiumState: StadiumState;
 }
 
 export const ResourceLayer: React.FC<ResourceLayerProps> = ({
@@ -10,7 +11,7 @@ export const ResourceLayer: React.FC<ResourceLayerProps> = ({
   const assets = stadiumState?.assets || [];
   return (
     <>
-      {assets.map((asset: any) => (
+      {assets.map((asset) => (
         <g key={asset.id} className="transition-all duration-300">
           <circle
             cx={asset.x}

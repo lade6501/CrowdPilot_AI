@@ -3,9 +3,10 @@ import { ShieldAlert, HeartPulse, Flame, AlertOctagon, CloudLightning, Award, Br
 import { ScenarioPanel } from "../ScenarioPanel";
 import { AnnouncePanel } from "../AnnouncePanel";
 import { UploadPanel } from "../UploadPanel";
+import { translations } from "../../utils/translations";
 
 interface DecisionStudioTabProps {
-  t: any;
+  t: typeof translations.en;
   injectorLoading: boolean;
   handleInject: (type: string) => void;
 }

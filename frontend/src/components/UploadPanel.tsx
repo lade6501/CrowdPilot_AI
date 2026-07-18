@@ -70,7 +70,6 @@ export const UploadPanel: React.FC = () => {
 
         {!uploadLoading && !uploadResult && (
           <div className="space-y-4">
-            {}
             <div className="p-3 bg-slate-900/60 border border-white/5 rounded-xl text-[11px] text-gray-400">
               <span className="font-bold text-gray-200 block mb-1">
                 CSV Format Requirements:
@@ -85,8 +84,6 @@ export const UploadPanel: React.FC = () => {
                 Gate C,41,3
               </code>
             </div>
-
-            {}
             <div
               onDragEnter={handleDrag}
               onDragOver={handleDrag}
@@ -111,8 +108,6 @@ export const UploadPanel: React.FC = () => {
                 {t.upload_drop}
               </span>
             </div>
-
-            {}
             <button
               type="button"
               onClick={loadSampleData}
@@ -132,15 +127,12 @@ export const UploadPanel: React.FC = () => {
             </p>
           </div>
         )}
-
-        {}
         {!uploadLoading && uploadResult && (
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             className="space-y-4"
           >
-            {}
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
               <div className="bg-slate-900/40 p-2 rounded-lg border border-white/5">
                 <span className="text-[9px] text-gray-500 uppercase block">
@@ -176,7 +168,6 @@ export const UploadPanel: React.FC = () => {
               </div>
             </div>
 
-            {}
             <div className="space-y-1">
               <span className="text-[10px] text-gray-400 uppercase font-semibold">
                 {t.upload_results}
@@ -192,7 +183,7 @@ export const UploadPanel: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-white/5 text-gray-300">
                     {Object.entries(uploadResult.parsed_gates).map(
-                      ([gName, gate]: [string, any]) => (
+                      ([gName, gate]) => (
                         <tr key={gName}>
                           <td className="p-2 font-medium">{gName}</td>
                           <td className="p-2">
@@ -219,8 +210,6 @@ export const UploadPanel: React.FC = () => {
           </motion.div>
         )}
       </div>
-
-      {}
       {!uploadLoading && uploadResult && (
         <button
           onClick={clearUpload}

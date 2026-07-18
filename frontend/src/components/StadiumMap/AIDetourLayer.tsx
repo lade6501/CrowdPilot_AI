@@ -1,10 +1,11 @@
 import React from "react";
 import { getDetourTarget, getDetourPathD } from "./stadiumHelpers";
 import { gateCoords2D } from "./stadiumConstants";
+import type { Gate } from "../../context/CrowdPilotContextInstance";
 
 interface AIDetourLayerProps {
   overloadedGates: string[];
-  gates: any;
+  gates: Record<string, Gate>;
   showCrowd: boolean;
 }
 

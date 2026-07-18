@@ -1,10 +1,11 @@
 import React from "react";
+import type { StadiumState } from "../../context/CrowdPilotContextInstance";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   activeTab: "live" | "studio" | "retro";
   handleTabChange: (tab: "live" | "studio" | "retro") => void;
-  stadiumState: any;
+  stadiumState: StadiumState | null;
   appHeader: React.ReactNode;
 }
 
@@ -15,6 +16,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   stadiumState,
   appHeader,
 }) => {
+  const pendingActionCount = (stadiumState?.actions_queue || []).filter(
+    (action) => action.status === "pending",
+  ).length;
+
   return (
     <div className="min-h-screen pb-12">
       {appHeader}
@@ -30,15 +35,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             }`}
           >
             🟢 Live Operations
-            {(stadiumState?.actions_queue || []).filter(
-              (act: any) => act.status === "pending",
-            ).length > 0 && (
+            {pendingActionCount > 0 && (
               <span className="ml-1.5 px-1.5 py-0.5 text-[9px] bg-emerald-500/20 text-emerald-400 rounded-full font-bold animate-bounce">
-                {
-                  (stadiumState?.actions_queue || []).filter(
-                    (act: any) => act.status === "pending",
-                  ).length
-                }
+                {pendingActionCount}
               </span>
             )}
           </button>

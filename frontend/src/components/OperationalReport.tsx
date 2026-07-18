@@ -11,7 +11,7 @@ export const OperationalReport: React.FC = () => {
   if (!stadiumState) return null;
 
   const maxOcc = Math.max(
-    ...Object.values(stadiumState.gates).map((g: any) => g.occupancy)
+    ...Object.values(stadiumState.gates).map((gate) => gate.occupancy)
   );
   const peakGate = Object.keys(stadiumState.gates).find(
     (key) => stadiumState.gates[key].occupancy === maxOcc
@@ -33,7 +33,7 @@ export const OperationalReport: React.FC = () => {
     : "4.2";
 
   const approvedActionsCount = (stadiumState.actions_queue || []).filter(
-    (act: any) => act.status === "approved" || act.status === "executed"
+    (action) => action.status === "approved" || action.status === "executed"
   ).length;
   const totalActionsCount = (stadiumState.actions_queue || []).length;
   const successRate = totalActionsCount > 0 

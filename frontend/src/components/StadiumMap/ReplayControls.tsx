@@ -1,9 +1,11 @@
 import React from "react";
 import { Clock, RefreshCw } from "lucide-react";
+import { translations } from "../../utils/translations";
+import type { StadiumState } from "../../context/CrowdPilotContextInstance";
 
 interface ReplayControlsProps {
-  t: any;
-  stadiumState: any;
+  t: typeof translations.en;
+  stadiumState: StadiumState;
   currentSliderIndex: number;
   handleSliderChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   resetToLive: () => void;

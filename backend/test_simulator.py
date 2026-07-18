@@ -43,10 +43,10 @@ def clean_state():
 def test_connection_manager_connect_disconnect():
     cm = simulator.ConnectionManager()
     ws = MockWebsocket()
-    asyncio.run(cm.connect(ws))
+    asyncio.run(cm.connect(ws)) # type: ignore
     assert len(cm.active_connections) == 1
     assert ws.accepted is True
-    cm.disconnect(ws)
+    cm.disconnect(ws) # type: ignore
     assert len(cm.active_connections) == 0
 
 def test_connection_manager_broadcast():
@@ -54,8 +54,8 @@ def test_connection_manager_broadcast():
     ws1 = MockWebsocket()
     ws2 = MockWebsocket()
     ws2.should_fail_send = True
-    asyncio.run(cm.connect(ws1))
-    asyncio.run(cm.connect(ws2))
+    asyncio.run(cm.connect(ws1)) # type: ignore
+    asyncio.run(cm.connect(ws2)) # type: ignore
     asyncio.run(cm.broadcast({"test": "data"}))
     assert len(ws1.sent_messages) == 1
     assert len(cm.active_connections) == 1
@@ -189,23 +189,23 @@ def test_tick_down_quota_limit():
 
 def test_advance_timestamp():
     simulator.sim_tick = 5
-    simulator._advance_timestamp()
+    simulator._advance_timestamp(simulator.stadium_state, simulator.sim_tick)
     assert simulator.stadium_state["timestamp"] == "19:20:00"
 
 def test_update_match_narrative():
-    simulator._update_match_narrative(1)
+    simulator._update_match_narrative(simulator.stadium_state, 1)
     assert simulator.stadium_state["match"]["time_label"] == "Pre-match"
-    simulator._update_match_narrative(4)
+    simulator._update_match_narrative(simulator.stadium_state, 4)
     assert simulator.stadium_state["match"]["time_label"] == "15'"
-    simulator._update_match_narrative(11)
+    simulator._update_match_narrative(simulator.stadium_state, 11)
     assert simulator.stadium_state["match"]["time_label"] == "Halftime"
-    simulator._update_match_narrative(22)
+    simulator._update_match_narrative(simulator.stadium_state, 22)
     assert simulator.stadium_state["match"]["time_label"] == "85'"
 
 def test_grow_gate_occupancy():
-    simulator._grow_gate_occupancy(2)
-    simulator._grow_gate_occupancy(8)
-    simulator._grow_gate_occupancy(15)
+    simulator._grow_gate_occupancy(simulator.stadium_state, 2)
+    simulator._grow_gate_occupancy(simulator.stadium_state, 8)
+    simulator._grow_gate_occupancy(simulator.stadium_state, 15)
     for g in ["Gate A", "Gate B", "Gate C", "Gate D"]:
         assert simulator.stadium_state["gates"][g]["occupancy"] >= 10
         assert simulator.stadium_state["gates"][g]["queue"] >= 1
@@ -213,16 +213,16 @@ def test_grow_gate_occupancy():
 def test_apply_scripted_weather():
     simulator.stadium_state["weather_source"] = "fallback"
     simulator.stadium_state["weather"]["alerts"] = []
-    simulator._apply_scripted_weather(3)
+    simulator._apply_scripted_weather(simulator.stadium_state, 3)
     assert simulator.stadium_state["weather"]["condition"] == "Heavy Rain Warning"
-    simulator._apply_scripted_weather(7)
+    simulator._apply_scripted_weather(simulator.stadium_state, 7)
     assert simulator.stadium_state["weather"]["condition"] == "Thunderstorm"
 
 def test_inject_scripted_incidents():
     simulator.stadium_state["incidents"] = []
-    simulator._inject_scripted_incidents(2)
+    simulator._inject_scripted_incidents(simulator.stadium_state, 2)
     assert any(inc.get("type") == "metro_delay" for inc in simulator.stadium_state["incidents"])
-    simulator._inject_scripted_incidents(5)
+    simulator._inject_scripted_incidents(simulator.stadium_state, 5)
     assert any(inc.get("type") == "medical" for inc in simulator.stadium_state["incidents"])
 
 def test_process_active_reroutes():

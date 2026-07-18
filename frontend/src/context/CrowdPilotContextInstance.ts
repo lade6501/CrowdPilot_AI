@@ -35,6 +35,16 @@ export interface Metro {
   line: string;
 }
 
+export interface OperationalAsset {
+  id: string;
+  type: "medic" | "shuttle" | "security" | string;
+  label: string;
+  status: string;
+  x: number;
+  y: number;
+  gate?: string;
+}
+
 export interface RecommendationItem {
   id: string;
   title: string;
@@ -74,7 +84,7 @@ export interface AgentAction {
   why: string;
   action: string;
   risk_level: "Low" | "Medium" | "High";
-  status: "review" | "pending" | "auto_executed" | "failed_governance" | "approved" | "denied" | "resolved_by_governance";
+  status: "review" | "pending" | "auto_executed" | "failed_governance" | "approved" | "denied" | "resolved_by_governance" | "executed";
   timestamp: string;
   verification_status: "not_started" | "pending" | "success" | "failed";
   verification_result: string;
@@ -93,6 +103,7 @@ export interface StadiumState {
   weather: Weather;
   incidents: Incident[];
   metro: Metro;
+  assets?: OperationalAsset[];
   ai_summary?: AISummary;
   ai_error?: string | null;
   actions_queue?: AgentAction[];
@@ -137,6 +148,11 @@ export interface AnnouncementResult {
   hindi: string;
 }
 
+export interface UploadResult {
+  parsed_gates: Record<string, Gate>;
+  analysis: AISummary;
+}
+
 export interface CrowdPilotContextType {
   connected: boolean;
   tick: number;
@@ -160,7 +176,7 @@ export interface CrowdPilotContextType {
   generateAnnouncement: (situation: string, tone: string, audience: string) => Promise<void>;
   clearAnnouncement: () => void;
   uploadLoading: boolean;
-  uploadResult: { parsed_gates: Record<string, Gate>; analysis: AISummary } | null;
+  uploadResult: UploadResult | null;
   uploadCSV: (file: File) => Promise<void>;
   clearUpload: () => void;
   orchestrateLoading: boolean;

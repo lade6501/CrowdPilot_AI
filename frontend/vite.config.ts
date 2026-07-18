@@ -7,6 +7,27 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       'process.env.BASE_URL': JSON.stringify(env.BASE_URL || 'https://crowdpilot-ai-1hps.onrender.com')
+    },
+    build: {
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('three') || id.includes('@react-three')) {
+                return 'vendor-three';
+              }
+              if (id.includes('framer-motion')) {
+                return 'vendor-framer-motion';
+              }
+              if (id.includes('lucide-react')) {
+                return 'vendor-lucide';
+              }
+              return 'vendor-core';
+            }
+          }
+        }
+      }
     }
   };
 })

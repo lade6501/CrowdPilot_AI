@@ -128,7 +128,7 @@ export const AnnouncePanel: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (isPlaying) {
       interval = setInterval(() => {
         setAudioProgress((prev) => {
@@ -137,7 +137,9 @@ export const AnnouncePanel: React.FC = () => {
         });
       }, 300);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isPlaying]);
 
   const autoDraft = stadiumState?.auto_draft_announcement;
@@ -150,8 +152,6 @@ export const AnnouncePanel: React.FC = () => {
           {t.announce_title}
         </h2>
         <p className="text-xs text-gray-400 mb-3">{t.announce_desc}</p>
-
-        {}
         {autoDraft && (
           <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-xl mb-4 text-xs space-y-2 border-dashed">
             <div className="flex items-center justify-between text-purple-400 font-bold uppercase tracking-wider text-[8px]">
@@ -178,8 +178,6 @@ export const AnnouncePanel: React.FC = () => {
             </button>
           </div>
         )}
-
-        {}
         <div className="space-y-2 mb-4">
           <span className="text-[10px] text-gray-400 uppercase font-semibold">
             Quick Situations
@@ -198,8 +196,6 @@ export const AnnouncePanel: React.FC = () => {
             ))}
           </div>
         </div>
-
-        {}
         <form onSubmit={handleGenerate} className="space-y-3">
           <div className="space-y-1">
             <label className="text-[10px] text-gray-400 uppercase font-semibold">
@@ -267,8 +263,6 @@ export const AnnouncePanel: React.FC = () => {
           </button>
         </form>
       </div>
-
-      {}
       <div className="mt-6 flex-1 flex flex-col justify-center">
         {announcementLoading && (
           <div className="flex flex-col items-center justify-center py-12 text-gray-500 text-center">
@@ -294,7 +288,6 @@ export const AnnouncePanel: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="space-y-4"
           >
-            {}
             <div className="bg-slate-950/60 border border-white/5 p-3 rounded-xl flex items-center justify-between gap-4 text-xs">
               <button
                 type="button"
@@ -315,8 +308,6 @@ export const AnnouncePanel: React.FC = () => {
                   <Play className="h-4 w-4 pl-0.5" />
                 )}
               </button>
-
-              {}
               <div className="flex-1 flex flex-col justify-center">
                 <span className="text-[8px] text-gray-500 font-bold uppercase tracking-wider block mb-1">
                   {isPlaying
@@ -354,8 +345,6 @@ export const AnnouncePanel: React.FC = () => {
                   : "0:00"}
               </span>
             </div>
-
-            {}
             <div className="max-h-55 overflow-y-auto space-y-3 pr-1">
               {[
                 {
@@ -393,7 +382,6 @@ export const AnnouncePanel: React.FC = () => {
                       {lang.label}
                     </span>
                     <div className="flex items-center gap-1.5 opacity-60 group-hover/item:opacity-100 transition-opacity">
-                      {}
                       <button
                         onClick={() => speakText(lang.text, lang.key)}
                         className={`p-1 rounded hover:bg-slate-800 transition-colors ${
@@ -409,8 +397,6 @@ export const AnnouncePanel: React.FC = () => {
                           <Play className="h-3.5 w-3.5 pl-0.5" />
                         )}
                       </button>
-
-                      {}
                       <button
                         onClick={() => copyToClipboard(lang.text, lang.key)}
                         className="text-gray-500 hover:text-gray-300 p-1 rounded hover:bg-slate-800 transition-colors"
@@ -422,8 +408,6 @@ export const AnnouncePanel: React.FC = () => {
                           <Copy className="h-3 w-3" />
                         )}
                       </button>
-
-                      {}
                       <button
                         onClick={() =>
                           setShowQR(showQR === lang.key ? null : lang.key)
@@ -435,8 +419,6 @@ export const AnnouncePanel: React.FC = () => {
                       </button>
                     </div>
                   </div>
-
-                  {}
                   {showQR === lang.key && (
                     <div className="p-3 bg-slate-950 rounded-lg border border-white/10 flex flex-col items-center justify-center text-center space-y-2">
                       <svg

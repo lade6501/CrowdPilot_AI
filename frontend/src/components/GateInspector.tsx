@@ -2,13 +2,15 @@ import React from "react";
 import { Users, Timer, CalendarRange } from "lucide-react";
 
 import { translations } from "../utils/translations";
+import type { AppLang } from "../utils/translations";
+import type { Gate, StadiumState } from "../context/CrowdPilotContextInstance";
 
 interface GateInspectorProps {
-  gates: any;
+  gates: Record<string, Gate>;
   selectedGate: string | null;
   setSelectedGate: (g: string | null) => void;
-  stadiumState: any;
-  appLanguage: string;
+  stadiumState: StadiumState;
+  appLanguage: AppLang;
 }
 
 export const GateInspector: React.FC<GateInspectorProps> = ({
@@ -18,7 +20,7 @@ export const GateInspector: React.FC<GateInspectorProps> = ({
   stadiumState,
   appLanguage,
 }) => {
-  const t = (translations as any)[appLanguage] || translations.en;
+  const t = translations[appLanguage] || translations.en;
 
   const getPredictions = (gateName: string, currentOccupancy: number) => {
     const variance = gateName === "Gate B" && currentOccupancy >= 90 ? 4 : 2;

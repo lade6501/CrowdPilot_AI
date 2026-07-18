@@ -6,9 +6,10 @@ import { PredictionLayer } from "./PredictionLayer";
 import { IncidentLayer } from "./IncidentLayer";
 import { ResourceLayer } from "./ResourceLayer";
 import { StadiumLegend } from "./StadiumLegend";
+import type { Gate, StadiumState } from "../../context/CrowdPilotContextInstance";
 
 interface Stadium2DProps {
-  gates: any;
+  gates: Record<string, Gate>;
   setSelectedGate: (g: string | null) => void;
   hoveredGate: string | null;
   setHoveredGate: (g: string | null) => void;
@@ -23,7 +24,7 @@ interface Stadium2DProps {
   isStorm: boolean;
   isMedical: boolean;
   selectedGate: string | null;
-  stadiumState: any;
+  stadiumState: StadiumState;
   setShowCrowd: (show: boolean) => void;
   setShowAIPaths: (show: boolean) => void;
   setShowResources: (show: boolean) => void;

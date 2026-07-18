@@ -1,8 +1,9 @@
 import React from "react";
 import { getGateColorClass } from "./stadiumHelpers";
+import type { Gate } from "../../context/CrowdPilotContextInstance";
 
 interface GateMarkersProps {
-  gates: any;
+  gates: Record<string, Gate>;
   setSelectedGate: (g: string | null) => void;
   hoveredGate: string | null;
   setHoveredGate: (g: string | null) => void;

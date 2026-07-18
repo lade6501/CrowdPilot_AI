@@ -144,7 +144,7 @@ def test_api_resume():
     assert response.status_code == 200
     assert response.json()["status"] == "resumed"
 
-@patch("backend.main.orchestrator_agent.orchestrate")
+@patch("backend.api.upload.orchestrator_agent.orchestrate")
 def test_csv_upload_validation_valid(mock_orchestrate):
     mock_summary = MagicMock()
     mock_summary.model_dump.return_value = {"summary": "uploaded CSV summary"}
@@ -231,7 +231,7 @@ def test_api_deploy_plan_failure(mock_deploy):
     response = client.post("/api/actions/deploy-plan", json={"plan_summary": "Test Plan"})
     assert response.status_code == 500
 
-@patch("backend.simulator.reset_simulator_to_live", side_effect=Exception("Resume error"))
+@patch("backend.api.simulation.reset_simulator_to_live", side_effect=Exception("Resume error"))
 def test_api_resume_failure(mock_resume):
     response = client.post("/api/resume")
     assert response.status_code == 500

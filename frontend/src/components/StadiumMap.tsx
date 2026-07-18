@@ -43,7 +43,7 @@ export const StadiumMap: React.FC = () => {
   }
 
   const { gates } = stadiumState;
-  const t = (translations as any)[appLanguage] || translations.en;
+  const t = translations[appLanguage] || translations.en;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const index = parseInt(e.target.value);
@@ -59,8 +59,8 @@ export const StadiumMap: React.FC = () => {
     (g) => (gates[g]?.occupancy || 0) >= 90,
   );
 
-  const activeIncidents = (stadiumState?.incidents || []).filter(
-    (inc: any) => inc.status === "active",
+  const activeIncidents = stadiumState.incidents.filter(
+    (incident) => incident.status === "active",
   );
   const activeIncident = activeIncidents[0];
   const incidentTitle = activeIncident?.title || "";

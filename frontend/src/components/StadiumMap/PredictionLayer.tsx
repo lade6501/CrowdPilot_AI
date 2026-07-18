@@ -1,10 +1,11 @@
 import React from "react";
 import { getDetourTarget } from "./stadiumHelpers";
 import { gateCoords2D } from "./stadiumConstants";
+import type { Gate } from "../../context/CrowdPilotContextInstance";
 
 interface PredictionLayerProps {
   overloadedGates: string[];
-  gates: any;
+  gates: Record<string, Gate>;
 }
 
 export const PredictionLayer: React.FC<PredictionLayerProps> = ({

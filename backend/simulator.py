@@ -4,16 +4,12 @@ import random
 import logging
 import time
 import copy
-from typing import List, Dict, Any
+from typing import List
+from fastapi import WebSocket
 from config import config, is_production
 from agents.orchestrator import orchestrator_agent, get_mock_fallback_summary
 from agents.agentic_core import agentic_manager
 from simulator_constants import (
-    KICKOFF_TICK,
-    HALFTIME_TICK,
-    LATE_MATCH_TICK,
-    GATE_OCCUPANCY_MIN,
-    GATE_OCCUPANCY_MAX,
     WEATHER_REFRESH_INTERVAL,
     ADJACENT_GATE,
     REPLAY_PRESETS,
@@ -22,6 +18,13 @@ from simulator_helpers import (
     _compute_operational_metrics,
     _compute_efficiency_score,
     fetch_real_weather,
+    _advance_timestamp,
+    _update_match_narrative,
+    _grow_gate_occupancy,
+    _update_parking,
+    _apply_scripted_weather,
+    _inject_scripted_incidents,
+    _clamp_gate_values,
 )
 
 logger = logging.getLogger("simulator")
@@ -30,14 +33,14 @@ logging.basicConfig(level=logging.INFO)
 class ConnectionManager:
     """Manages active WebSocket connections for live simulation streaming."""
     def __init__(self):
-        self.active_connections: List[Any] = []
+        self.active_connections: List[WebSocket] = []
 
-    async def connect(self, websocket: Any):
+    async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
         logger.info(f"New client connected. Total connections: {len(self.active_connections)}")
 
-    def disconnect(self, websocket: Any):
+    def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
             logger.info(f"Client disconnected. Total connections: {len(self.active_connections)}")
@@ -61,7 +64,7 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
-stadium_state: Dict[str, Any] = {
+stadium_state: dict = {
     "mode": "live",
     "timestamp": "19:00:00",
     "match": {
@@ -353,110 +356,6 @@ def _tick_down_quota_limit():
         if stadium_state["quota_countdown"] == 0:
             stadium_state["quota_limited"] = False
 
-def _advance_timestamp():
-    """Calculates active simulation clocks based on ticks."""
-    h = 19 + (sim_tick * 4) // 60
-    m = (sim_tick * 4) % 60
-    stadium_state["timestamp"] = f"{h:02d}:{m:02d}:00"
-
-def _update_match_narrative(tick: int):
-    """Updates active team score and commentary details for milestones."""
-    if tick == 1:
-        stadium_state["match"] = {
-            "teams": "USA vs Mexico",
-            "score": "0 - 0",
-            "time_label": "Pre-match",
-            "detail": "Inflow starting. Spectators moving past parking gates."
-        }
-    elif tick == KICKOFF_TICK:
-        stadium_state["match"] = {
-            "teams": "USA vs Mexico",
-            "score": "0 - 0",
-            "time_label": "15'",
-            "detail": "Kickoff commenced. High entry gate volumes."
-        }
-    elif tick == HALFTIME_TICK:
-        stadium_state["match"] = {
-            "teams": "USA vs Mexico",
-            "score": "1 - 0",
-            "time_label": "Halftime",
-            "detail": "USA Scores! Spectators flooding concession grids."
-        }
-    elif tick == LATE_MATCH_TICK:
-        stadium_state["match"] = {
-            "teams": "USA vs Mexico",
-            "score": "2 - 1",
-            "time_label": "85'",
-            "detail": "Tense match climax. Early exit crowd preparation."
-        }
-
-def _grow_gate_occupancy(tick: int):
-    """Simulates automatic gate spectator flow rates based on parking capacity influx."""
-    lots = stadium_state.get("parking", {})
-    if lots:
-        avg_parking_occ = sum(lot["occupancy"] for lot in lots.values()) / len(lots)
-        parking_influx = 1.0 + (avg_parking_occ / 200.0)
-    else:
-        parking_influx = 1.0
-
-    if 1 <= tick <= 6:
-        stadium_state["gates"]["Gate A"]["occupancy"] += int(random.randint(1, 4) * parking_influx)
-        stadium_state["gates"]["Gate A"]["queue"] += int(random.randint(1, 3) * parking_influx)
-    elif 7 <= tick <= 12:
-        stadium_state["gates"]["Gate B"]["occupancy"] += int(random.randint(1, 3) * parking_influx)
-        stadium_state["gates"]["Gate B"]["queue"] += int(random.randint(1, 2) * parking_influx)
-        stadium_state["gates"]["Gate C"]["occupancy"] += int(random.randint(1, 3) * parking_influx)
-        stadium_state["gates"]["Gate C"]["queue"] += int(random.randint(1, 2) * parking_influx)
-    elif 13 <= tick <= 20:
-        stadium_state["gates"]["Gate D"]["occupancy"] += int(random.randint(1, 4) * parking_influx)
-        stadium_state["gates"]["Gate D"]["queue"] += int(random.randint(1, 3) * parking_influx)
-
-    for gate in ["Gate A", "Gate B", "Gate C", "Gate D"]:
-        stadium_state["gates"][gate]["occupancy"] += int(random.randint(-1, 2) * parking_influx)
-        stadium_state["gates"][gate]["queue"] += int(random.randint(-1, 1) * parking_influx)
-
-        stadium_state["gates"][gate]["occupancy"] = max(GATE_OCCUPANCY_MIN, min(GATE_OCCUPANCY_MAX, stadium_state["gates"][gate]["occupancy"]))
-        stadium_state["gates"][gate]["queue"] = max(1, min(45, stadium_state["gates"][gate]["queue"]))
-
-def _update_parking():
-    """Simulates parking lots load increases."""
-    stadium_state["parking"]["Lot A"]["occupancy"] = min(100, stadium_state["parking"]["Lot A"]["occupancy"] + random.randint(0, 1))
-    stadium_state["parking"]["Lot B"]["occupancy"] = min(100, stadium_state["parking"]["Lot B"]["occupancy"] + random.randint(0, 1))
-
-def _apply_scripted_weather(tick: int):
-    """Simulates scripted fallback weather conditions."""
-    if stadium_state.get("weather_source") != "live":
-        if tick == 3:
-            stadium_state["weather"]["condition"] = "Heavy Rain Warning"
-            stadium_state["weather"]["alerts"].append("Heavy rain expected in 12 minutes")
-        elif tick == 7:
-            stadium_state["weather"]["condition"] = "Thunderstorm"
-            stadium_state["weather"]["alerts"] = ["Severe thunderstorm overhead. Seek shelter inside concourses."]
-
-def _inject_scripted_incidents(tick: int):
-    """Simulates scripted incident events timeline triggers."""
-    if tick == 2:
-        new_inc = {
-            "id": f"inc_{tick}",
-            "timestamp": stadium_state["timestamp"],
-            "type": "metro_delay",
-            "title": "Metro Line 2 Delays",
-            "description": "Metro Line 2 experiencing a 10-minute signal delay at University Station.",
-            "priority": "Medium",
-            "status": "active"
-        }
-        stadium_state["incidents"].append(new_inc)
-    elif tick == 5:
-        new_inc = {
-            "id": f"inc_{tick}",
-            "timestamp": stadium_state["timestamp"],
-            "type": "medical",
-            "title": "Medical Incident - Section 104",
-            "description": "Spectator fainted in Section 104. First aid team dispatched.",
-            "priority": "Critical",
-            "status": "active"
-        }
-        stadium_state["incidents"].append(new_inc)
 
 def _process_active_reroutes():
     """Calculates crowd diversion metrics for active AI reroutes."""
@@ -652,13 +551,6 @@ def _check_sla_breaches(tick: int):
     if len(stadium_state["sla_countdowns"]) == 0:
         stadium_state["sla_breached"] = False
 
-def _clamp_gate_values():
-    """Clamps occupancy levels and queue metrics to stadium physical limitations."""
-    gates_dict = stadium_state.get("gates", {})
-    for g_data in gates_dict.values():
-        g_data["occupancy"] = max(0, min(100, g_data["occupancy"]))
-        g_data["queue"] = max(0, g_data["queue"])
-
 async def simulate_step():
     """Main orchestrator for sequential simulation loop tasks."""
     global sim_tick, is_locked_to_replay
@@ -670,12 +562,12 @@ async def simulate_step():
         
     sim_tick += 1
     
-    _advance_timestamp()
-    _update_match_narrative(sim_tick)
-    _grow_gate_occupancy(sim_tick)
-    _update_parking()
-    _apply_scripted_weather(sim_tick)
-    _inject_scripted_incidents(sim_tick)
+    _advance_timestamp(stadium_state, sim_tick)
+    _update_match_narrative(stadium_state, sim_tick)
+    _grow_gate_occupancy(stadium_state, sim_tick)
+    _update_parking(stadium_state)
+    _apply_scripted_weather(stadium_state, sim_tick)
+    _inject_scripted_incidents(stadium_state, sim_tick)
     _process_active_reroutes()
     _resolve_dispatched_incidents()
     
@@ -685,7 +577,7 @@ async def simulate_step():
     _sync_agentic_state()
     _update_assets()
     _check_sla_breaches(sim_tick)
-    _clamp_gate_values()
+    _clamp_gate_values(stadium_state)
     
     safety_idx, overall_status = _compute_operational_metrics(stadium_state["gates"], stadium_state["incidents"])
     stadium_state["safety_index"] = safety_idx

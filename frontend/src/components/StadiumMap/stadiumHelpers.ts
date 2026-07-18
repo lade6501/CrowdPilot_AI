@@ -1,4 +1,5 @@
 import { gateCoords2D } from "./stadiumConstants";
+import type { Gate } from "../../context/CrowdPilotContextInstance";
 
 export const getGateColorClass = (occupancy: number) => {
   if (occupancy >= 90) return "fill-red-500 stroke-red-600 gate-critical-pulse";
@@ -6,7 +7,7 @@ export const getGateColorClass = (occupancy: number) => {
   return "fill-emerald-500 stroke-emerald-600";
 };
 
-export const getDetourTarget = (srcGate: string, gates: any) => {
+export const getDetourTarget = (srcGate: string, gates: Record<string, Gate>) => {
   const gateOptions = ["Gate A", "Gate B", "Gate C", "Gate D"].filter(
     (g) => g !== srcGate,
   );
