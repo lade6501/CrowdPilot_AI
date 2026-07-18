@@ -10,6 +10,8 @@ class Config:
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     PORT = int(os.getenv("PORT", 8000))
     HOST = os.getenv("HOST", "0.0.0.0")
+    SIMULATION_TICK_INTERVAL = int(os.getenv("SIMULATION_TICK_INTERVAL", 0))
+    SLA_BREACH_THRESHOLD = int(os.getenv("SLA_BREACH_THRESHOLD", 0))
 
     @classmethod
     def validate(cls):

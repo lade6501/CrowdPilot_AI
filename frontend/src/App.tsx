@@ -67,8 +67,8 @@ const DashboardContent: React.FC = () => {
           const data = await res.json();
           setApiConfigured(data.gemini_api_configured);
         }
-      } catch (e) {
-        console.error("Failed to fetch API status:", e);
+      } catch {
+        
       }
     };
     checkStatus();

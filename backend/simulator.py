@@ -3,7 +3,9 @@ import json
 import random
 import logging
 import time
+import os
 from typing import List, Dict, Any
+from backend.config import config
 
 logger = logging.getLogger("simulator")
 logging.basicConfig(level=logging.INFO)
@@ -828,15 +830,17 @@ async def simulate_step():
                 asset["status"] = "arrived"
                 timestamp = time.strftime("%H:%M:%S")
 
-                stadium_state["incidents"].append({
-                    "id": f"inc_arr_{asset['id']}",
-                    "timestamp": timestamp,
-                    "type": "asset_tracking",
-                    "title": f"Asset {asset['label']} Arrived",
-                    "description": f"Resource {asset['label']} has arrived at target destination.",
-                    "priority": "Low",
-                    "status": "resolved"
-                })
+                tracking_id = f"inc_arr_{asset['id']}_{sim_tick}"
+                if not any(inc["id"] == tracking_id for inc in stadium_state["incidents"]):
+                    stadium_state["incidents"].append({
+                        "id": tracking_id,
+                        "timestamp": timestamp,
+                        "type": "asset_tracking",
+                        "title": f"Asset {asset['label']} Arrived",
+                        "description": f"Resource {asset['label']} has arrived at target destination.",
+                        "priority": "Low",
+                        "status": "resolved"
+                    })
             assets_to_keep.append(asset)
         else:
 
@@ -854,24 +858,27 @@ async def simulate_step():
         
     any_breach = False
     
+    is_prod = "RENDER" in os.environ or os.getenv("IS_PROD", "false").lower() == "true"
+    tick_interval = config.SIMULATION_TICK_INTERVAL if config.SIMULATION_TICK_INTERVAL > 0 else (12 if is_prod else 4)
+    sla_max = config.SLA_BREACH_THRESHOLD if config.SLA_BREACH_THRESHOLD > 0 else (60 if is_prod else 20)
+    
     for gate_name, gate_data in stadium_state["gates"].items():
         if gate_data["occupancy"] >= 90:
             if gate_name not in stadium_state["sla_countdowns"]:
-                stadium_state["sla_countdowns"][gate_name] = 20
+                stadium_state["sla_countdowns"][gate_name] = sla_max
             else:
-                stadium_state["sla_countdowns"][gate_name] = max(0, stadium_state["sla_countdowns"][gate_name] - 4)
+                stadium_state["sla_countdowns"][gate_name] = max(0, stadium_state["sla_countdowns"][gate_name] - tick_interval)
                 
             if stadium_state["sla_countdowns"][gate_name] == 0:
                 any_breach = True
-                breach_id = f"inc_sla_{gate_name.replace(' ', '_').lower()}"
+                breach_prefix = f"inc_sla_{gate_name.replace(' ', '_').lower()}"
                 
-
-                sla_logged = any(inc["id"] == breach_id and inc["status"] == "active" for inc in stadium_state["incidents"])
+                sla_logged = any(inc["id"].startswith(breach_prefix) and inc["status"] == "active" for inc in stadium_state["incidents"])
                 if not sla_logged:
                     stadium_state["sla_breached"] = True
                     timestamp = time.strftime("%H:%M:%S")
                     stadium_state["incidents"].append({
-                        "id": breach_id,
+                        "id": f"{breach_prefix}_{sim_tick}",
                         "timestamp": timestamp,
                         "type": "safety_sla",
                         "title": f"SAFETY SLA BREACH: {gate_name.upper()} OVERLOADED",
@@ -886,13 +893,12 @@ async def simulate_step():
                             action["governance_check"] = "failed"
                             action["governance_details"] = "ESCALATED DUE TO SLA BREACH: Autonomy overridden. Safety lock requires Operator manual bypass."
         else:
-
             if gate_name in stadium_state["sla_countdowns"]:
                 del stadium_state["sla_countdowns"][gate_name]
                 
-            breach_id = f"inc_sla_{gate_name.replace(' ', '_').lower()}"
+            breach_prefix = f"inc_sla_{gate_name.replace(' ', '_').lower()}"
             for inc in stadium_state["incidents"]:
-                if inc.get("id") == breach_id and inc.get("status") == "active":
+                if inc.get("id", "").startswith(breach_prefix) and inc.get("status") == "active":
                     inc["status"] = "resolved"
                     logger.info(f"Safety SLA Breach marked as resolved ({gate_name} telemetry stabilized).")
                     
@@ -963,9 +969,12 @@ async def simulate_step():
 
 async def start_simulator_loop():
     logger.info("Simulator loop started.")
+    is_prod = "RENDER" in os.environ or os.getenv("IS_PROD", "false").lower() == "true"
+    tick_interval = float(config.SIMULATION_TICK_INTERVAL) if config.SIMULATION_TICK_INTERVAL > 0 else (12.0 if is_prod else 4.0)
+    logger.info(f"Running simulation with interval: {tick_interval}s")
     while True:
         try:
-            await asyncio.sleep(4.0)
+            await asyncio.sleep(tick_interval)
             await simulate_step()
         except asyncio.CancelledError:
             logger.info("Simulator loop stopped.")

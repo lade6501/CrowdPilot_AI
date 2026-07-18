@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Line } from "@react-three/drei";
+import { OrbitControls, Line, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useCrowdPilot } from "../context/CrowdPilotContext";
 
@@ -209,6 +209,19 @@ const GateNode: React.FC<GateNodeProps> = ({ name, occupancy, selected, onClick 
           <meshBasicMaterial color="#ef4444" transparent opacity={0.3} />
         </mesh>
       )}
+
+      <Html position={[0, 1.7, 0]} center distanceFactor={12}>
+        <div className="bg-slate-950/90 backdrop-blur-md px-2 py-0.5 rounded border border-white/10 select-none shadow-[0_0_10px_rgba(0,0,0,0.8)] text-center pointer-events-none flex flex-col items-center min-w-[56px]">
+          <span className="text-[8px] font-black text-gray-100 uppercase tracking-wider block">
+            {name}
+          </span>
+          <span className={`text-[7.5px] font-bold mt-0.5 block ${
+            occupancy >= 90 ? "text-red-400 font-extrabold animate-pulse" : occupancy >= 75 ? "text-amber-400 font-bold" : "text-emerald-400 font-medium"
+          }`}>
+            {Math.round(occupancy)}%
+          </span>
+        </div>
+      </Html>
     </group>
   );
 };

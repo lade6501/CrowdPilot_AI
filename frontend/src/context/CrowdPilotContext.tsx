@@ -244,8 +244,8 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ level }),
       });
-    } catch (e) {
-      console.error("Failed to update autonomy:", e);
+    } catch {
+      
     }
   }, []);
 
@@ -254,8 +254,8 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       await fetch(`${API_BASE}/api/actions/${actionId}/approve`, {
         method: "POST",
       });
-    } catch (e) {
-      console.error("Failed to approve action:", e);
+    } catch {
+      
     }
   }, []);
 
@@ -264,8 +264,8 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       await fetch(`${API_BASE}/api/actions/${actionId}/deny`, {
         method: "POST",
       });
-    } catch (e) {
-      console.error("Failed to deny action:", e);
+    } catch {
+      
     }
   }, []);
 
@@ -276,8 +276,8 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan_summary: planSummary }),
       });
-    } catch (e) {
-      console.error("Failed to deploy plan:", e);
+    } catch {
+      
     }
   }, []);
 
@@ -339,8 +339,7 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
         }
       }));
       return translated;
-    } catch (e) {
-      console.error("AI translation API failed:", e);
+    } catch {
       return text;
     }
   }, [translationCache]);
@@ -355,7 +354,6 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
 
       ws.onopen = () => {
         setConnected(true);
-        console.log("WebSocket connected to CrowdPilot operations engine.");
       };
 
       ws.onmessage = (event) => {
@@ -376,19 +374,17 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
               setActiveTimeSlot("Live Feed");
             }
           }
-        } catch (e) {
-          console.error("Error parsing WebSocket event:", e);
+        } catch {
+          
         }
       };
 
       ws.onclose = () => {
         setConnected(false);
-        console.log("WebSocket disconnected. Reconnecting in 3 seconds...");
-        reconnectTimeout = setTimeout(connectWS, 3000);
+        reconnectTimeout = setTimeout(connectWS, 4000);
       };
 
-      ws.onerror = (err) => {
-        console.error("WebSocket error:", err);
+      ws.onerror = () => {
         ws.close();
       };
     };
@@ -411,7 +407,6 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       if (!response.ok) throw new Error("Replay shift failed");
       setActiveTimeSlot(slot);
     } catch (e) {
-      console.error(e);
       alert("Error shifting replay: " + e);
     }
   }, []);
@@ -424,7 +419,6 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       if (!response.ok) throw new Error("Resume shift failed");
       setActiveTimeSlot("Live Feed");
     } catch (e) {
-      console.error(e);
       alert("Error resuming live feed: " + e);
     }
   }, []);
@@ -439,7 +433,6 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       });
       if (!response.ok) throw new Error("Incident injection failed");
     } catch (e) {
-      console.error(e);
       alert("Error injecting incident: " + e);
     } finally {
       setInjectorLoading(false);
@@ -468,7 +461,6 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       const data = await response.json();
       setSimulationResult(data);
     } catch (e) {
-      console.error(e);
       alert("Error executing scenario simulation: " + e);
     } finally {
       setSimulationLoading(false);
@@ -492,7 +484,6 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       const data = await response.json();
       setAnnouncementResult(data);
     } catch (e) {
-      console.error(e);
       alert("Error generating announcements: " + e);
     } finally {
       setAnnouncementLoading(false);
@@ -518,7 +509,6 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       const data = await response.json();
       setUploadResult(data);
     } catch (e) {
-      console.error(e);
       alert("Error analyzing CSV: " + e);
     } finally {
       setUploadLoading(false);
@@ -537,7 +527,6 @@ export const CrowdPilotProvider: React.FC<{ children: ReactNode }> = ({ children
       });
       if (!response.ok) throw new Error("Manual AI orchestration failed");
     } catch (e) {
-      console.error(e);
       alert("Error executing AI orchestration: " + e);
     } finally {
       setOrchestrateLoading(false);
