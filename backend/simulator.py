@@ -848,8 +848,8 @@ async def simulate_step():
     any_breach = False
     
     is_prod = "RENDER" in os.environ or os.getenv("IS_PROD", "false").lower() == "true"
-    tick_interval = config.SIMULATION_TICK_INTERVAL if config.SIMULATION_TICK_INTERVAL > 0 else (12 if is_prod else 4)
-    sla_max = config.SLA_BREACH_THRESHOLD if config.SLA_BREACH_THRESHOLD > 0 else (60 if is_prod else 20)
+    tick_interval = config.SIMULATION_TICK_INTERVAL if config.SIMULATION_TICK_INTERVAL > 0 else (12 if is_prod else 8)
+    sla_max = config.SLA_BREACH_THRESHOLD if config.SLA_BREACH_THRESHOLD > 0 else (60 if is_prod else 40)
     
     for gate_name, gate_data in stadium_state["gates"].items():
         if gate_data["occupancy"] >= 90:
