@@ -1,6 +1,5 @@
-import json
 import logging
-from typing import Type, TypeVar, Dict, Any
+from typing import Type, TypeVar
 from pydantic import BaseModel
 import google.generativeai as genai
 from backend.config import config

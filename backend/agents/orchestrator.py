@@ -1,9 +1,12 @@
+import logging
 from pydantic import BaseModel, Field
 from typing import List
 from backend.agents.base import BaseAgent
 from backend.agents.operations import operations_agent
 from backend.agents.crowd import crowd_agent
 from backend.agents.risk import risk_agent
+
+logger = logging.getLogger("orchestrator")
 
 class RecommendationItem(BaseModel):
     id: str = Field(..., description="Unique recommendation ID (e.g. rec_1)")
@@ -95,10 +98,7 @@ def get_best_detour_gate(src_gate: str, gates: dict) -> str:
 
 def get_mock_fallback_summary(stadium_state: dict) -> OperationsSummary:
     gates = stadium_state.get("gates", {})
-    parking = stadium_state.get("parking", {})
-    weather = stadium_state.get("weather", {})
     incidents = stadium_state.get("incidents", [])
-    metro = stadium_state.get("metro", {})
     
 
     max_occ = max(g.get("occupancy", 0) for g in gates.values()) if gates else 0
@@ -125,7 +125,6 @@ def get_mock_fallback_summary(stadium_state: dict) -> OperationsSummary:
         if inc.get("status") == "active":
             inc_type = inc.get("type")
             inc_title = inc.get("title", "")
-            inc_id = inc.get("id", "inc_1")
             
             if inc_type == "medical":
                 recs.append(RecommendationItem(

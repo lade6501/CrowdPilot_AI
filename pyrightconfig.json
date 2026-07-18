@@ -1,0 +1,11 @@
+{
+  "venvPath": ".",
+  "venv": "venv",
+  "reportPrivateImportUsage": "none",
+  "reportMissingImports": "warning",
+  "reportOptionalMemberAccess": "warning",
+  "reportArgumentType": "warning",
+  "reportOperatorIssue": "warning",
+  "reportUnusedImport": "warning",
+  "reportUnusedVariable": "warning"
+}

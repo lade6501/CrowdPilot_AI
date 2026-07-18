@@ -28,7 +28,7 @@ class CrowdIntelligenceAgent(BaseAgent):
             )
         )
 
-    def analyze(self, gates_data: dict, history: list = None) -> CrowdIntelligenceReport:
+    def analyze(self, gates_data: dict, history: list | None = None) -> CrowdIntelligenceReport:
         prompt = (
             f"Analyze the current gates data:\n{gates_data}\n"
             f"Historical trend context (if any):\n{history}\n"

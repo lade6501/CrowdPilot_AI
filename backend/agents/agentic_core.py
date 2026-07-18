@@ -1,5 +1,4 @@
 import time
-import random
 import logging
 import asyncio
 from typing import List, Dict, Any
@@ -68,6 +67,20 @@ AGENT_REGISTRY = [
     }
 ]
 
+PARKING_AVG_THRESHOLD = 80
+PARKING_LOT_CRITICAL_THRESHOLD = 95
+GOVERNANCE_DELAY_SHORT = 1.5
+GOVERNANCE_DELAY_LONG = 1.6
+CONFIDENCE_THRESHOLD_LOW = 80
+CONFIDENCE_GATE_B = 74
+CONFIDENCE_GATE_A = 78
+CONFIDENCE_DEFAULT = 82
+
+def _is_medical_or_fire(proposer: str, action_text: str, why: str):
+    is_med = "medical" in proposer.lower() or "medic" in action_text.lower() or "medical" in why.lower()
+    is_fire = "fire" in proposer.lower() or "evacuation" in action_text.lower() or "fire" in why.lower()
+    return is_med, is_fire
+
 class AgenticManager:
     def __init__(self):
         self.autonomy_level = "suggest_only"
@@ -97,8 +110,7 @@ class AgenticManager:
                     why = action["why"]
 
 
-                    is_medical = "medical" in proposer.lower() or "medic" in action_text.lower() or "medical" in why.lower()
-                    is_fire = "fire" in proposer.lower() or "evacuation" in action_text.lower() or "fire" in why.lower()
+                    is_medical, is_fire = _is_medical_or_fire(proposer, action_text, why)
 
                     if is_medical or is_fire:
                         continue
@@ -140,7 +152,7 @@ class AgenticManager:
         return action_id
 
     async def run_governance_review(self, action_id: str, action_data: Dict[str, Any]):
-        await asyncio.sleep(1.5)
+        await asyncio.sleep(GOVERNANCE_DELAY_SHORT)
         
         action = next((a for a in self.actions_queue if a["id"] == action_id), None)
         if not action:
@@ -151,9 +163,7 @@ class AgenticManager:
         risk = action["risk_level"]
         why = action["why"]
 
-
         if "close" in action_text.lower() and "gate" in action_text.lower():
-
             closed_gates = [a for a in self.actions_queue if "close" in a["action"].lower() and a["status"] in ["approved", "auto_executed"] and a["id"] != action_id]
             if len(closed_gates) >= 1:
                 action["status"] = "failed_governance"
@@ -162,9 +172,7 @@ class AgenticManager:
                 logger.warning(f"Action {action_id} blocked by Governance: Max gate closures policy violated.")
                 return
 
-
-        is_medical = "medical" in proposer.lower() or "medic" in action_text.lower() or "medical" in why.lower()
-        is_fire = "fire" in proposer.lower() or "evacuation" in action_text.lower() or "fire" in why.lower()
+        is_medical, is_fire = _is_medical_or_fire(proposer, action_text, why)
         
         if is_medical:
             action["governance_check"] = "passed"
@@ -270,7 +278,6 @@ class AgenticManager:
             if action["verification_status"] == "pending" and current_tick >= action["target_tick"]:
                 target = action["target_metric"]
                 initial = action["initial_value"]
-                action_text = action["action"]
                 
                 if target.startswith("gates.") and target.endswith(".occupancy"):
                     gate_name = target.split(".")[1]
@@ -356,8 +363,8 @@ class AgenticManager:
                         self.trigger_scripted_disagreement()
                     else:
 
-                        confidence = 74 if gate_name == "Gate B" else (78 if gate_name == "Gate A" else 82)
-                        confidence_flag = "Low Confidence" if confidence < 80 else "Normal Confidence"
+                        confidence = CONFIDENCE_GATE_B if gate_name == "Gate B" else (CONFIDENCE_GATE_A if gate_name == "Gate A" else CONFIDENCE_DEFAULT)
+                        confidence_flag = "Low Confidence" if confidence < CONFIDENCE_THRESHOLD_LOW else "Normal Confidence"
                         
 
                         self.add_action_to_queue({
@@ -458,7 +465,7 @@ class AgenticManager:
         lots = stadium_state.get("parking", {})
         if lots:
             avg_parking = sum(lot["occupancy"] for lot in lots.values()) / len(lots)
-            if avg_parking >= 80:
+            if avg_parking >= PARKING_AVG_THRESHOLD:
                 steward_proposed = any(a["target_metric"] == "parking.influx" for a in self.actions_queue)
                 if not steward_proposed:
                     self.add_action_to_queue({
@@ -480,7 +487,7 @@ class AgenticManager:
             lot_data = stadium_state.get("parking", {}).get(lot_name)
             if lot_data:
                 lot_occ = lot_data["occupancy"]
-                if lot_occ >= 95:
+                if lot_occ >= PARKING_LOT_CRITICAL_THRESHOLD:
                     proposed = any(a["target_metric"] == f"gates.{gate_name}.parking_surge" for a in self.actions_queue)
                     if not proposed:
                         self.add_action_to_queue({
@@ -515,7 +522,7 @@ class AgenticManager:
         asyncio.create_task(self.resolve_disagreement(cf_id, log_id))
 
     async def resolve_disagreement(self, cf_id: str, log_id: str):
-        await asyncio.sleep(1.6)
+        await asyncio.sleep(GOVERNANCE_DELAY_LONG)
         
         cf_action = next((a for a in self.actions_queue if a["id"] == cf_id), None)
         log_action = next((a for a in self.actions_queue if a["id"] == log_id), None)

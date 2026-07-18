@@ -248,7 +248,7 @@ async def post_resume():
 @app.post("/api/upload")
 async def post_upload(file: UploadFile = File(...)):
     try:
-        if not file.filename.lower().endswith('.csv'):
+        if not file.filename or not file.filename.lower().endswith('.csv'):
             raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
         content = await file.read()
         if len(content) > 2 * 1024 * 1024:
@@ -267,9 +267,9 @@ async def post_upload(file: UploadFile = File(...)):
                 continue
             gate_name = g_val if g_val.lower().startswith("gate") else f"Gate {g_val}"
             try:
-                occupancy = int(row["occupancy"])
-                queue = int(row["queue"])
-                flow_rate = int(row.get("flow_rate", 10))
+                occupancy = int(row["occupancy"]) # type: ignore
+                queue = int(row["queue"]) # type: ignore
+                flow_rate = int(row.get("flow_rate", 10)) # type: ignore
                 if not (0 <= occupancy <= 100):
                     raise ValueError(f"Occupancy must be between 0 and 100 (got {occupancy})")
                 if queue < 0:
@@ -279,7 +279,7 @@ async def post_upload(file: UploadFile = File(...)):
             except (ValueError, TypeError) as val_err:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Malformed data on row {idx + 1}: {str(val_err)}"
+                    detail=f"Malformed data on row {str(idx)}: {str(val_err)}"
                 )
             custom_gates[gate_name] = {
                 "occupancy": occupancy,

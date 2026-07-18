@@ -22,3 +22,6 @@ class Config:
             )
 
 config = Config()
+
+def is_production() -> bool:
+    return "RENDER" in os.environ or os.getenv("IS_PROD", "false").lower() == "true"
