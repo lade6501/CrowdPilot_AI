@@ -1,8 +1,9 @@
 import React, { useState, useRef } from "react";
-import { useCrowdPilot } from "../hooks/useCrowdPilot";
-import { translations } from "../utils/translations";
 import { Upload, FileSpreadsheet, RotateCcw } from "lucide-react";
 import { motion } from "framer-motion";
+
+import { useCrowdPilot } from "../hooks/useCrowdPilot";
+import { translations } from "../utils/translations";
 
 export const UploadPanel: React.FC = () => {
   const { uploadCSV, uploadLoading, uploadResult, clearUpload, appLanguage } =

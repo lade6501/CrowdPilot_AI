@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import { useCrowdPilot } from "../hooks/useCrowdPilot";
 
 interface AITranslateProps {

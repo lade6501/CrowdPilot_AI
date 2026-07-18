@@ -1,7 +1,8 @@
 import React from "react";
+import { CloudSun, Navigation, Car, AlertTriangle } from "lucide-react";
+
 import { useCrowdPilot } from "../hooks/useCrowdPilot";
 import { translations } from "../utils/translations";
-import { CloudSun, Navigation, Car, AlertTriangle } from "lucide-react";
 
 export const TelemetryFeed: React.FC = () => {
   const { stadiumState, appLanguage } = useCrowdPilot();

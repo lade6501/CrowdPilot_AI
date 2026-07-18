@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import { useCrowdPilot } from "../hooks/useCrowdPilot";
 import { translations } from "../utils/translations";
 import { Play, RotateCcw, AlertTriangle, ArrowRight, Sparkles, HelpCircle, ArrowUpRight, ArrowDownRight } from "lucide-react";

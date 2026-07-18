@@ -1,5 +1,6 @@
 import React from "react";
 import { Users, Timer, CalendarRange } from "lucide-react";
+
 import { translations } from "../utils/translations";
 
 interface GateInspectorProps {

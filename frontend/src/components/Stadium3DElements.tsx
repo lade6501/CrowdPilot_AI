@@ -2,6 +2,7 @@ import React, { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Line, Html } from "@react-three/drei";
 import * as THREE from "three";
+
 import { gateCoords } from "./Stadium3DConstants";
 
 export const HolographicField: React.FC = () => {
